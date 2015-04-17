@@ -57,13 +57,13 @@ pub fn tokenize_str(code: &str) -> ParseResult {
 }
 
 fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
-    let token_str = list.remove(0).unwrap_or(format!("42"));
+    let token_str = list.pop_front().unwrap_or(format!("42"));
 
     match &token_str[..] {
         "(" => {
             let mut tokens = Vec::new();
 
-            while let Some(item_str) = list.remove(0) {
+            while let Some(item_str) = list.pop_front() {
                 if &item_str[..] == ")" {
                     return Ok(Token::List(tokens));
                 }
