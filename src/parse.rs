@@ -27,7 +27,7 @@ fn preprocess(code: &str) -> VecDeque<String> {
     let list_re = r"\(|\)";
     let op_re = r"\+|-|\*|/|\^|&|\||=";
     
-    let regex = format!("(?P<word>{}|{}|{}|{}|{})", string_re, num_re, sym_re, list_re, op_re);
+    let regex = format!("{}|{}|{}|{}|{}", string_re, num_re, sym_re, list_re, op_re);
 
     let re = match Regex::new(&regex) {
         Ok(re) => re,
@@ -40,12 +40,14 @@ fn preprocess(code: &str) -> VecDeque<String> {
 
     let spaced_code = spaced_code.trim();
 
-    let mut spaced_vec = VecDeque::new();
+    let mut token_strs = VecDeque::new();
+
     for cap in re.captures_iter(&spaced_code) {
-        spaced_vec.push_back(cap.name("word").unwrap().to_string());
+        let match_str = cap.at(0).unwrap();
+        token_strs.push_back(match_str.to_string());
     }
 
-    spaced_vec
+    return token_strs;
 }
 
 pub fn tokenize_str(code: &str) -> ParseResult {
@@ -66,7 +68,8 @@ fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
                     return Ok(Token::List(tokens));
                 }
 
-                tokens.push(tokenize_atom(item_str));    
+                list.push_front(item_str);
+                tokens.push(try!(tokenize(list)));
             }
 
             Err(ParseError::UnclosedList)
