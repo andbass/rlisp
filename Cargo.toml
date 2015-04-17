@@ -1,0 +1,7 @@
+[package]
+name = "rlisp"
+version = "0.0.1"
+authors = ["Andrew Bass <andybass009@gmail.com>"]
+
+[dependencies]
+regex = "*"
