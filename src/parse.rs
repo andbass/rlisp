@@ -44,7 +44,7 @@ fn preprocess(code: &str) -> VecDeque<String> {
     let mut token_strs = VecDeque::new();
 
     for cap in re.captures_iter(&spaced_code) {
-        let match_str = cap.at(0).unwrap();
+        let match_str = cap.at(0).unwrap_or("");
         token_strs.push_back(match_str.to_string());
     }
 
