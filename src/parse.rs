@@ -6,6 +6,7 @@ use std::collections::VecDeque;
 #[derive(Debug, Clone)]
 pub enum ParseError {
     UnclosedList,
+    InvalidListDelimitter,
 }
 
 pub type ParseResult = Result<Token, ParseError>;
@@ -68,15 +69,15 @@ fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
                     return Ok(Token::List(tokens));
                 }
 
+                // If not the end of the list, push the item back and continue to process the list
                 list.push_front(item_str);
                 tokens.push(try!(tokenize(list)));
             }
 
             Err(ParseError::UnclosedList)
         },
-        atom => {
-            Ok(tokenize_atom(atom.to_string()))
-        }
+        ")" => Err(ParseError::InvalidListDelimitter),
+        atom => Ok(tokenize_atom(atom.to_string())),
     }
 }
 

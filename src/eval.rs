@@ -3,7 +3,8 @@ use std::fmt;
 use std::collections::HashMap;
 
 use parse::{self, Token, ParseError};
-use default_env;
+use value::{Value, FnWrapper};
+use env::Env;
 
 pub type FuncResult = Result<Value, FuncError>;
 
@@ -16,33 +17,14 @@ pub enum FuncError {
     ParsingErr(ParseError),
 }
 
-#[derive(Clone)]
-pub struct FnWrapper(fn(Vec<Value>) -> FuncResult);
-
-pub fn hard_fn(f: fn(Vec<Value>) -> FuncResult) -> Value {
-    Value::HardFunc(FnWrapper(f))
-}
-
-#[derive(Clone, PartialEq)]
-pub enum Value {
-    Number(f32),
-    Bool(bool),
-    Str(String),
-
-    HardFunc(FnWrapper),
-
-    List(Vec<Value>),
-    Void,
-}
-
 pub struct Lisp {
-    env: HashMap<String, Value>,
+    env: Env,
 }
 
 impl Lisp {
     pub fn new() -> Lisp {
         Lisp {
-            env: default_env::env(),
+            env: Env::new(), 
         }
     }
 
@@ -59,7 +41,7 @@ impl Lisp {
         match token {
             Token::Number(n) => Ok(Value::Number(n)),
             Token::StrLit(lit) => Ok(Value::Str(lit)),
-            Token::Sym(sym) => self.env.get(&sym).cloned().ok_or(FuncError::UndeclaredSymbol(sym)),
+            Token::Sym(sym) => self.env.map.get(&sym).cloned().ok_or(FuncError::UndeclaredSymbol(sym)),
             Token::List(mut tokens) => {
                 let func = try!(self.eval_token(tokens.remove(0)));
 
@@ -79,15 +61,6 @@ impl Lisp {
     }
 }
 
-impl Value {
-    pub fn to_f32(self) -> Result<f32, FuncError> {
-        match self {
-            Value::Number(n) => Ok(n),
-            _ => Err(FuncError::InvalidType),
-        }
-    }
-}
-
 impl fmt::Debug for Value {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -101,11 +74,3 @@ impl fmt::Debug for Value {
     }
 }
 
-impl PartialEq for FnWrapper {
-    fn eq(&self, rhs: &FnWrapper) -> bool {
-        let selfPtr = self as *const Self;
-        let rhsPtr = rhs as *const Self;
-
-        selfPtr == rhsPtr
-    }
-}
