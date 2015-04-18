@@ -41,7 +41,7 @@ pub fn print(vals: Vec<Value>) -> FuncResult {
     Ok(Value::Nil)
 }
 
-pub fn read(mut vals: Vec<Value>) -> FuncResult {
+pub fn input(mut vals: Vec<Value>) -> FuncResult {
     if vals.len() > 1 {
         return Err(FuncError::InvalidArguments);
     }

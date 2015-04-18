@@ -34,7 +34,7 @@ impl Env {
         env.set("=", FnWrapper(default_env::eq));
 
         env.set("print", FnWrapper(default_env::print));
-        env.set("read", FnWrapper(default_env::read));
+        env.set("input", FnWrapper(default_env::input));
         env.set("exit", FnWrapper(default_env::exit));
 
         // String operations
