@@ -117,14 +117,14 @@ pub fn or(vals: Vec<Value>) -> FuncResult {
         match val {
             Value::Bool(val) => {
                 if val {
-                    return Ok(Value::Bool(true));
+                    return Ok(true.to_lisp());
                 }
             },
             _ => return Err(FuncError::InvalidArguments),
         }
     }
 
-    Ok(Value::Bool(false))
+    Ok(false.to_lisp())
 }
 
 pub fn not(vals: Vec<Value>) -> FuncResult {
