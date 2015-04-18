@@ -37,10 +37,7 @@ fn preprocess(code: &str) -> VecDeque<String> {
 
     let spaced_code = code.to_string()
         .replace("(", " ( ")
-        .replace(")", " ) ")
-        .replace(r"\n", "\n")
-        .replace(r"\t", "\t")
-        .replace(r"\r", "\r");
+        .replace(")", " ) ");
 
     let spaced_code = spaced_code.trim();
 
@@ -100,7 +97,13 @@ fn string_lit(slice: &str) -> Option<String> {
 
     if &slice[0..1] == "\"" && &slice[end .. len] == "\"" {
         let lit = &slice[1..end];
-        return Some(lit.to_string());
+
+        let lit_str = lit.to_string()
+            .replace(r"\n", "\n")
+            .replace(r"\t", "\t")
+            .replace(r"\r", "\r");
+
+        return Some(lit_str);
     }
 
     return None;
