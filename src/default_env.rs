@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::io::{self, Read};
 use std::ops;
 
-use value::{Value};
+use value::{Value, ToLisp};
 use eval::{FuncError, FuncResult};
 
 macro_rules! math {
@@ -24,7 +24,7 @@ macro_rules! math {
                 }
             }
 
-            Ok(Value::Number(total))
+            Ok(total.to_lisp())
         }
     }
 }
@@ -49,7 +49,7 @@ pub fn read(vals: Vec<Value>) -> FuncResult {
     match stdin.read_line(&mut input) {
         Ok(_) => {
             input.pop(); // remove newline
-            Ok(Value::Str(input))
+            Ok(input.to_lisp())
         }
         Err(err) => Err(FuncError::IoError(err)),
     }
@@ -84,17 +84,17 @@ pub fn str_fn(vals: Vec<Value>) -> FuncResult {
         result.push_str(&string);
     }
 
-    Ok(Value::Str(result))
+    Ok(result.to_lisp())
 }
 
 pub fn eq(vals: Vec<Value>) -> FuncResult {
     for i in (0 .. vals.len() - 1) {
         if vals[i] != vals[i + 1] {
-            return Ok(Value::Bool(false));
+            return Ok(false.to_lisp());
         }
     }
 
-    Ok(Value::Bool(true))
+    Ok(true.to_lisp())
 }
 
 pub fn and(vals: Vec<Value>) -> FuncResult {
@@ -102,14 +102,14 @@ pub fn and(vals: Vec<Value>) -> FuncResult {
         match val {
             Value::Bool(val) => {
                 if !val {
-                    return Ok(Value::Bool(false));
+                    return Ok(false.to_lisp());
                 }
             },
             _ => return Err(FuncError::InvalidArguments),
         }
     }
 
-    Ok(Value::Bool(true))
+    Ok(true.to_lisp())
 }
 
 pub fn or(vals: Vec<Value>) -> FuncResult {

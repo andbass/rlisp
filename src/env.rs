@@ -15,15 +15,18 @@ impl Env {
             map: HashMap::new()
         };
 
+        // Additional literals
         env.set("true", true);
         env.set("false", false);
 
         env.set("nil", ());
 
+        // Booleans
         env.set("and", FnWrapper(default_env::and));
         env.set("or", FnWrapper(default_env::or));
         env.set("not", FnWrapper(default_env::not));
 
+        // Ops
         env.set("+", FnWrapper(default_env::add));
         env.set("-", FnWrapper(default_env::sub));
         env.set("*", FnWrapper(default_env::mul));
@@ -34,6 +37,7 @@ impl Env {
         env.set("read", FnWrapper(default_env::read));
         env.set("exit", FnWrapper(default_env::exit));
 
+        // String operations
         env.set("str", FnWrapper(default_env::str_fn));
 
         env
