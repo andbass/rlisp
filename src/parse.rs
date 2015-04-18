@@ -37,7 +37,10 @@ fn preprocess(code: &str) -> VecDeque<String> {
 
     let spaced_code = code.to_string()
         .replace("(", " ( ")
-        .replace(")", " ) ");
+        .replace(")", " ) ")
+        .replace(r"\n", "\n")
+        .replace(r"\t", "\t")
+        .replace(r"\r", "\r");
 
     let spaced_code = spaced_code.trim();
 

@@ -35,8 +35,8 @@ fn tokenize_test(mut lisp: Lisp) {
 }
 
 fn eval_test(mut lisp: Lisp) {
-    let code = r#"(+ 2 2)"#;
+    let code = r#"(print "hello\n")"#;
 
-    let n: f32 = lisp.eval(code).unwrap();
-    println!("{}", n);
+    let result: () = lisp.eval(code).unwrap();
+    println!("{:?}", result);
 }
