@@ -23,7 +23,7 @@ pub enum Token {
 
 fn preprocess(code: &str) -> VecDeque<String> {
     let string_re = r#""[^"]*""#;
-    let sym_re = r"_*-*\w+_*-*\w*_*-*";
+    let sym_re = r"\w+";
     let num_re = r"\d+\.*\d*";
     let list_re = r"\(|\)";
     let op_re = r"\+|-|\*|/|\^|&|\||=";
