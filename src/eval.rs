@@ -65,7 +65,8 @@ impl Lisp {
                     },
                     _ => Err(FuncError::AttemptToCallLiteral),
                 } 
-            }
+            },
+			Token::Quoted(tok) => Ok(Value::Quote(*tok)),
         }
     }
 }
@@ -75,10 +76,11 @@ impl fmt::Debug for Value {
         match self {
             &Value::List(ref values) => write!(fmt, "{:?}", values),
             &Value::Str(ref string) => write!(fmt, "{:?}", string),
-            &Value::Number(num) => write!(fmt, "{:?}", num),
+            &Value::Number(num) => write!(fmt, "{}", num),
             &Value::HardFunc(_) => write!(fmt, "HardFunc"),
             &Value::Nil => write!(fmt, "nil"),
             &Value::Bool(val) => write!(fmt, "{}", val),
+			&Value::Quote(ref tok) => write!(fmt, "'{:?}", tok),
         }
     }
 }

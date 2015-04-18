@@ -1,4 +1,5 @@
 
+use parse::Token;
 use eval::{FuncError, FuncResult};
 
 #[derive(Clone)]
@@ -14,6 +15,8 @@ pub enum Value {
 
     List(Vec<Value>),
     Nil,
+
+	Quote(Token),
 }
 
 pub trait ToLisp {

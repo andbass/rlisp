@@ -11,7 +11,7 @@ pub enum ParseError {
 
 pub type ParseResult = Result<Token, ParseError>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     Number(f32),
     StrLit(String),
@@ -19,6 +19,8 @@ pub enum Token {
     Sym(String),
 
     List(Vec<Token>),
+
+	Quoted(Box<Token>),
 }
 
 fn preprocess(code: &str) -> VecDeque<String> {
@@ -27,8 +29,9 @@ fn preprocess(code: &str) -> VecDeque<String> {
     let num_re = r"\d+\.*\d*e?\d*";
     let list_re = r"\(|\)";
     let op_re = r"\+|-|\*|/|\^|&|\||=";
+	let quote_re = r"'";
     
-    let regex = format!("{}|{}|{}|{}|{}", string_re, num_re, sym_re, list_re, op_re);
+    let regex = format!("{}|{}|{}|{}|{}|{}", string_re, num_re, sym_re, list_re, op_re, quote_re);
 
     let re = match Regex::new(&regex) {
         Ok(re) => re,
@@ -77,6 +80,10 @@ fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
             Err(ParseError::UnclosedList)
         },
         ")" => Err(ParseError::InvalidListDelimitter),
+		r"'" => {
+			let token = try!(tokenize(list));
+			Ok(Token::Quoted(box token))
+		},
         atom => Ok(tokenize_atom(atom.to_string())),
     }
 }

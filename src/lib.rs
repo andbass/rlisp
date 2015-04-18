@@ -1,5 +1,5 @@
 
-#![feature(core)]
+#![feature(box_syntax, core)]
 
 extern crate regex;
 
