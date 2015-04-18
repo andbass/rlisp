@@ -1,5 +1,6 @@
 
 use std::collections::HashMap;
+use std::io::{self, Read};
 use std::ops;
 
 use value::{Value};
@@ -35,6 +36,20 @@ pub fn print(vals: Vec<Value>) -> FuncResult {
     println!("");
 
     Ok(Value::Void)
+}
+
+pub fn read(vals: Vec<Value>) -> FuncResult {
+    if vals.len() != 0 {
+        return Err(FuncError::InvalidArguments);
+    }
+
+    let mut stdin = io::stdin();
+
+    let mut input = String::new();
+    match stdin.read_to_string(&mut input) {
+        Ok(_) => Ok(Value::Str(input)),
+        Err(err) => Err(FuncError::IoError(err)),
+    }
 }
 
 pub fn str_fn(vals: Vec<Value>) -> FuncResult {

@@ -1,4 +1,5 @@
 
+use std::io;
 use std::fmt;
 use std::collections::HashMap;
 
@@ -8,12 +9,14 @@ use env::Env;
 
 pub type FuncResult = Result<Value, FuncError>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum FuncError {
     InvalidArguments,
     InvalidType,
     UndeclaredSymbol(String),
     AttemptToCallLiteral,
+    IoError(io::Error),
+    
     ParsingErr(ParseError),
 }
 
