@@ -11,10 +11,10 @@ fn main() {
     
     loop {
         print!("rlisp {} > ", get_version());
-        io::stdout().flush();
+        io::stdout().flush().unwrap();
 
         let mut input = String::new();
-        io::stdin().read_line(&mut input);
+        io::stdin().read_line(&mut input).unwrap();
 
         let val = lisp.eval_raw(&input);
         println!("{:?}\n", val);

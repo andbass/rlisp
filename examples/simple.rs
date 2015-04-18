@@ -6,22 +6,8 @@ use rlisp::{Lisp, Value};
 fn main() {
     let mut lisp = Lisp::new();
 
-    repl(lisp);
     //tokenize_test(lisp);
     //eval_test(lisp);
-}
-
-fn repl(mut lisp: Lisp) {
-    loop {
-        print!("> ");
-        io::stdout().flush();
-
-        let mut code = String::new();
-        io::stdin().read_line(&mut code).unwrap();
-
-        let result = lisp.eval_raw(&code);
-        println!("{:?}\n", result);
-    }
 }
 
 fn tokenize_test(mut lisp: Lisp) {

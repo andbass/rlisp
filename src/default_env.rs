@@ -1,7 +1,7 @@
 
 use std::process;
 use std::collections::HashMap;
-use std::io::{self, Read};
+use std::io::{self, Read, Write};
 use std::ops;
 
 use value::{Value, ToLisp};
@@ -41,9 +41,24 @@ pub fn print(vals: Vec<Value>) -> FuncResult {
     Ok(Value::Nil)
 }
 
-pub fn read(vals: Vec<Value>) -> FuncResult {
-    if vals.len() != 0 {
+pub fn read(mut vals: Vec<Value>) -> FuncResult {
+    if vals.len() > 1 {
         return Err(FuncError::InvalidArguments);
+    }
+
+    let prompt = if vals.len() == 1 {
+        match vals.remove(0) {
+            Value::Str(prompt) => prompt,
+            _ => return Err(FuncError::InvalidArguments),
+        }
+    } else {
+        "".to_string()
+    };
+
+    print!("{}", prompt);
+    match io::stdout().flush() {
+        Ok(_) => (),
+        Err(err) => return Err(FuncError::IoError(err)),
     }
 
     let mut stdin = io::stdin();
