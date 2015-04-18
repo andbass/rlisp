@@ -47,14 +47,9 @@ pub fn read(vals: Vec<Value>) -> FuncResult {
 
     let mut input = String::new();
     match stdin.read_line(&mut input) {
+
         Ok(_) => {
-            match input.pop() {
-                None | Some('\n') => (),
-                Some(ch) => {
-                    input.push(ch);
-                },
-            }
-            
+            input.pop();
             Ok(Value::Str(input))
         }
         Err(err) => Err(FuncError::IoError(err)),
