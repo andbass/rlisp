@@ -1,4 +1,5 @@
 
+use std::process;
 use std::collections::HashMap;
 use std::io::{self, Read};
 use std::ops;
@@ -34,7 +35,6 @@ pub fn print(vals: Vec<Value>) -> FuncResult {
     }
 
     println!("");
-
     Ok(Value::Void)
 }
 
@@ -47,13 +47,29 @@ pub fn read(vals: Vec<Value>) -> FuncResult {
 
     let mut input = String::new();
     match stdin.read_line(&mut input) {
-
         Ok(_) => {
-            input.pop();
+            input.pop(); // remove newline
             Ok(Value::Str(input))
         }
         Err(err) => Err(FuncError::IoError(err)),
     }
+}
+
+pub fn exit(vals: Vec<Value>) -> FuncResult {
+    if vals.len() > 1 {
+        return Err(FuncError::InvalidArguments);
+    }
+
+    let exit_code = if vals.len() == 1 {
+        match vals[0] {
+            Value::Number(code) => code as i32,
+            _ => return Err(FuncError::InvalidArguments),
+        }
+    } else {
+        0
+    };
+
+    process::exit(exit_code);
 }
 
 pub fn str_fn(vals: Vec<Value>) -> FuncResult {

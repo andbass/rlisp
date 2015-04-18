@@ -29,6 +29,7 @@ impl Env {
 
         env.set("print", FnWrapper(default_env::print));
         env.set("read", FnWrapper(default_env::read));
+        env.set("exit", FnWrapper(default_env::exit));
 
         env.set("str", FnWrapper(default_env::str_fn));
 

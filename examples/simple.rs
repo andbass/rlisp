@@ -3,7 +3,7 @@ extern crate rlisp;
 
 use rlisp::{Lisp, Value};
 
-use std::io;
+use std::io::{self, Write};
 
 fn main() {
     let mut lisp = Lisp::new();
@@ -15,6 +15,9 @@ fn main() {
 
 fn repl(mut lisp: Lisp) {
     loop {
+        print!("> ");
+        io::stdout().flush();
+
         let mut code = String::new();
         io::stdin().read_line(&mut code).unwrap();
 
