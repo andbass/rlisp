@@ -29,6 +29,24 @@ macro_rules! math {
     }
 }
 
+pub fn pow(vals: Vec<Value>) -> FuncResult {
+    if vals.len() != 2 {
+        return Err(FuncError::InvalidArguments);
+    }
+
+    match vals[0] {
+        Value::Number(base) => {
+            match vals[1] {
+                Value::Number(exp) => {
+                    Ok(base.powf(exp).to_lisp())
+                },
+                _ => return Err(FuncError::InvalidArguments),
+            }
+        },
+        _ => return Err(FuncError::InvalidArguments),
+    }
+}
+
 pub fn print(vals: Vec<Value>) -> FuncResult {
     for val in vals {
         match val {

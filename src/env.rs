@@ -31,6 +31,7 @@ impl Env {
         env.set("-", FnWrapper(default_env::sub));
         env.set("*", FnWrapper(default_env::mul));
         env.set("/", FnWrapper(default_env::div));
+        env.set("pow", FnWrapper(default_env::pow));
         env.set("=", FnWrapper(default_env::eq));
 
         env.set("print", FnWrapper(default_env::print));
