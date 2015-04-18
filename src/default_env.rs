@@ -46,8 +46,12 @@ pub fn read(vals: Vec<Value>) -> FuncResult {
     let mut stdin = io::stdin();
 
     let mut input = String::new();
-    match stdin.read_to_string(&mut input) {
-        Ok(_) => Ok(Value::Str(input)),
+    match stdin.read_line(&mut input) {
+
+        Ok(_) => {
+            input.pop();
+            Ok(Value::Str(input))
+        }
         Err(err) => Err(FuncError::IoError(err)),
     }
 }
