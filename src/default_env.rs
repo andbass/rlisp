@@ -127,6 +127,17 @@ pub fn or(vals: Vec<Value>) -> FuncResult {
     Ok(Value::Bool(false))
 }
 
+pub fn not(vals: Vec<Value>) -> FuncResult {
+    if vals.len() != 1 {
+        return Err(FuncError::InvalidArguments);
+    }
+
+    match vals[0] {
+        Value::Bool(val) => Ok(Value::Bool(!val)),
+        _ => Err(FuncError::InvalidArguments),
+    }
+}
+
 math!(add, ops::Add::add);
 math!(sub, ops::Sub::sub);
 math!(mul, ops::Mul::mul);

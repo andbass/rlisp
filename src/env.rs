@@ -22,6 +22,7 @@ impl Env {
 
         env.set("and", FnWrapper(default_env::and));
         env.set("or", FnWrapper(default_env::or));
+        env.set("not", FnWrapper(default_env::not));
 
         env.set("+", FnWrapper(default_env::add));
         env.set("-", FnWrapper(default_env::sub));
