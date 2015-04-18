@@ -32,8 +32,8 @@ macro_rules! math {
 pub fn print(vals: Vec<Value>) -> FuncResult {
     for val in vals {
         match val {
-            Value::Str(string) => print!("{} ", string),
-            _ => print!("{:?} ", val),
+            Value::Str(string) => print!("{}", string),
+            _ => print!("{:?}", val),
         }
     }
 
