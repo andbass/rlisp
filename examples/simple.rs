@@ -3,8 +3,6 @@ extern crate rlisp;
 
 use rlisp::{Lisp, Value};
 
-use std::io::{self, Write};
-
 fn main() {
     let mut lisp = Lisp::new();
 
