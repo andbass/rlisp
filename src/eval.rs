@@ -3,7 +3,7 @@ use std::fmt;
 use std::collections::HashMap;
 
 use parse::{self, Token, ParseError};
-use value::{Value, FnWrapper};
+use value::{Value, FromLisp, ToLisp, FnWrapper};
 use env::Env;
 
 pub type FuncResult = Result<Value, FuncError>;
@@ -28,7 +28,13 @@ impl Lisp {
         }
     }
 
-    pub fn eval(&mut self, code: &str) -> FuncResult {
+    pub fn eval<T: FromLisp>(&mut self, code: &str) -> Result<T, FuncError> {
+        let result = try!(self.eval_raw(code));
+
+        return T::from_lisp(result);
+    }
+
+    pub fn eval_raw(&mut self, code: &str) -> FuncResult {
         let mut token = match parse::tokenize_str(code) {
             Ok(tok) => tok,
             Err(err) => return Err(FuncError::ParsingErr(err)),

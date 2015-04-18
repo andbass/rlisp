@@ -37,6 +37,22 @@ impl PartialEq for FnWrapper {
 macro_rules! to_lisp {
     ($( $t:ty: $path:path ),+) => {
         $( 
+        )*
+    }
+}
+
+macro_rules! lisp_impl {
+    ($( $t:ty: $path:path ),+) => {
+        $(
+            impl FromLisp for $t {
+                fn from_lisp(val: Value) -> Result<$t, FuncError> {
+                    match val {
+                        $path(val) => Ok(val),
+                        _ => Err(FuncError::InvalidType),
+                    }
+                }
+            }
+
             impl ToLisp for $t {
                 fn to_lisp(self) -> Value {
                     $path(self)
@@ -46,7 +62,7 @@ macro_rules! to_lisp {
     }
 }
 
-to_lisp!(bool: Value::Bool, 
-         f32: Value::Number, 
-         String: Value::Str,
-         FnWrapper: Value::HardFunc);
+lisp_impl!(bool: Value::Bool, 
+          f32: Value::Number, 
+          String: Value::Str,
+          FnWrapper: Value::HardFunc);

@@ -10,6 +10,7 @@ fn main() {
 
     repl(lisp);
     //tokenize_test(lisp);
+    //eval_test(lisp);
 }
 
 fn repl(mut lisp: Lisp) {
@@ -17,7 +18,7 @@ fn repl(mut lisp: Lisp) {
         let mut code = String::new();
         io::stdin().read_line(&mut code).unwrap();
 
-        let result = lisp.eval(&code);
+        let result = lisp.eval_raw(&code);
         println!("{:?}\n", result);
     }
 }
@@ -28,4 +29,11 @@ fn tokenize_test(mut lisp: Lisp) {
     "#;
 
     println!("{:?}", rlisp::parse::tokenize_str(code));
+}
+
+fn eval_test(mut lisp: Lisp) {
+    let code = r#"(+ 2 2)"#;
+
+    let n: f32 = lisp.eval(code).unwrap();
+    println!("{}", n);
 }
