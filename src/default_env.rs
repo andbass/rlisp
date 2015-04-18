@@ -62,6 +62,36 @@ pub fn eq(vals: Vec<Value>) -> FuncResult {
     Ok(Value::Bool(true))
 }
 
+pub fn and(vals: Vec<Value>) -> FuncResult {
+    for val in vals {
+        match val {
+            Value::Bool(val) => {
+                if !val {
+                    return Ok(Value::Bool(false));
+                }
+            },
+            _ => return Err(FuncError::InvalidArguments),
+        }
+    }
+
+    Ok(Value::Bool(true))
+}
+
+pub fn or(vals: Vec<Value>) -> FuncResult {
+    for val in vals {
+        match val {
+            Value::Bool(val) => {
+                if val {
+                    return Ok(Value::Bool(true));
+                }
+            },
+            _ => return Err(FuncError::InvalidArguments),
+        }
+    }
+
+    Ok(Value::Bool(false))
+}
+
 math!(add, ops::Add::add);
 math!(sub, ops::Sub::sub);
 math!(mul, ops::Mul::mul);

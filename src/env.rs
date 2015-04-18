@@ -18,6 +18,9 @@ impl Env {
         env.set("true", true);
         env.set("false", false);
 
+        env.set("and", FnWrapper(default_env::and));
+        env.set("or", FnWrapper(default_env::or));
+
         env.set("+", FnWrapper(default_env::add));
         env.set("-", FnWrapper(default_env::sub));
         env.set("*", FnWrapper(default_env::mul));
