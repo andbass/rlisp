@@ -28,7 +28,7 @@ fn repl(mut lisp: Lisp) {
 
 fn tokenize_test(mut lisp: Lisp) {
     let code = r#"
-        (+ 2.2 (* 2 2))
+        (?!sym# a b c)
     "#;
 
     println!("{:?}", rlisp::parse::tokenize_str(code));
