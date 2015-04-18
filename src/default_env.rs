@@ -35,7 +35,7 @@ pub fn print(vals: Vec<Value>) -> FuncResult {
     }
 
     println!("");
-    Ok(Value::Void)
+    Ok(Value::Nil)
 }
 
 pub fn read(vals: Vec<Value>) -> FuncResult {

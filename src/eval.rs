@@ -77,7 +77,7 @@ impl fmt::Debug for Value {
             &Value::Str(ref string) => write!(fmt, "{:?}", string),
             &Value::Number(num) => write!(fmt, "{:?}", num),
             &Value::HardFunc(_) => write!(fmt, "HardFunc"),
-            &Value::Void => write!(fmt, "Void"),
+            &Value::Nil => write!(fmt, "nil"),
             &Value::Bool(val) => write!(fmt, "{}", val),
         }
     }

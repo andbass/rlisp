@@ -13,7 +13,7 @@ pub enum Value {
     HardFunc(FnWrapper),
 
     List(Vec<Value>),
-    Void,
+    Nil,
 }
 
 pub trait ToLisp {
@@ -66,3 +66,16 @@ lisp_impl!(bool: Value::Bool,
           f32: Value::Number, 
           String: Value::Str,
           FnWrapper: Value::HardFunc);
+
+impl ToLisp for () {
+    fn to_lisp(self) -> Value { Value::Nil }
+}
+
+impl FromLisp for () {
+    fn from_lisp(val: Value) -> Result<(), FuncError> {
+        match val {
+            Value::Nil => Ok(()),
+            _ => Err(FuncError::InvalidType),
+        }
+    }
+}
