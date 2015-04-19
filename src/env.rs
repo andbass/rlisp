@@ -41,6 +41,9 @@ impl Env {
         // String operations
         env.set("str", FnWrapper(default_env::str_fn));
 
+        // List ops
+        env.set("cons", FnWrapper(default_env::cons)); 
+
         env
     }
 

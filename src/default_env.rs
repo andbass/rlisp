@@ -4,7 +4,8 @@ use std::collections::HashMap;
 use std::io::{self, Read, Write};
 use std::ops;
 
-use value::{Value, ToLisp};
+use value::{Value, ToLisp, FromLisp};
+use parse::Token;
 use eval::{FuncError, FuncResult};
 
 macro_rules! math {
@@ -172,6 +173,24 @@ pub fn not(vals: Vec<Value>) -> FuncResult {
         Value::Bool(val) => Ok(Value::Bool(!val)),
         _ => Err(FuncError::InvalidArguments),
     }
+}
+
+pub fn cons(mut vals: Vec<Value>) -> FuncResult {
+    if vals.len() != 2 {
+        return Err(FuncError::InvalidArguments);
+    }
+
+    let head: Token = try!(Token::from_lisp(vals.remove(0)));
+    let tail: Token = try!(Token::from_lisp(vals.remove(0)));
+
+    let mut tail_tokens = match tail {
+        Token::List(toks) => toks,
+        _ => return Err(FuncError::InvalidArguments),
+    };
+
+    tail_tokens.insert(0, head);
+
+    Ok(Value::Quote(Token::List(tail_tokens)))
 }
 
 math!(add, ops::Add::add);

@@ -68,7 +68,8 @@ macro_rules! lisp_impl {
 lisp_impl!(bool: Value::Bool, 
           f32: Value::Number, 
           String: Value::Str,
-          FnWrapper: Value::HardFunc);
+          FnWrapper: Value::HardFunc,
+          Token: Value::Quote);
 
 impl ToLisp for () {
     fn to_lisp(self) -> Value { Value::Nil }

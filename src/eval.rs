@@ -80,7 +80,7 @@ impl fmt::Debug for Value {
             &Value::HardFunc(_) => write!(fmt, "HardFunc"),
             &Value::Nil => write!(fmt, "nil"),
             &Value::Bool(val) => write!(fmt, "{}", val),
-			&Value::Quote(ref tok) => write!(fmt, "'{:?}", tok),
+			&Value::Quote(ref tok) => write!(fmt, "Quote({:?})", tok),
         }
     }
 }
