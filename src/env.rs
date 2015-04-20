@@ -11,9 +11,13 @@ pub struct Env {
 
 impl Env {
     pub fn new() -> Env {
-        let mut env = Env {
+        Env {
             map: HashMap::new()
-        };
+        }
+    }
+
+    pub fn std_lib() -> Env {
+        let mut env = Env::new();
 
         // Additional literals
         env.set("true", true);

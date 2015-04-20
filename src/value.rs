@@ -37,13 +37,6 @@ impl PartialEq for FnWrapper {
     }
 }
 
-macro_rules! to_lisp {
-    ($( $t:ty: $path:path ),+) => {
-        $( 
-        )*
-    }
-}
-
 macro_rules! lisp_impl {
     ($( $t:ty: $path:path ),+) => {
         $(

@@ -14,20 +14,20 @@ pub enum FuncError {
     InvalidArguments,
     InvalidType,
     UndeclaredSymbol(String),
-    AttemptToCallLiteral,
+    AttemptToCallNonFunction,
     IoError(io::Error),
     
     ParsingErr(ParseError),
 }
 
 pub struct Lisp {
-    env: Env,
+    scopes: Vec<Env>,
 }
 
 impl Lisp {
     pub fn new() -> Lisp {
         Lisp {
-            env: Env::new(), 
+            scopes: vec![Env::std_lib()], 
         }
     }
 
@@ -50,8 +50,17 @@ impl Lisp {
         match token {
             Token::Number(n) => Ok(Value::Number(n)),
             Token::StrLit(lit) => Ok(Value::Str(lit)),
-            Token::Sym(sym) => self.env.map.get(&sym).cloned().ok_or(FuncError::UndeclaredSymbol(sym)),
+            Token::Sym(sym) => {
+                for env in self.scopes.iter().rev() {
+                    if let Some(val) = env.map.get(&sym) {
+                        return Ok(val.clone());
+                    }
+                }
+
+                Err(FuncError::UndeclaredSymbol(sym))
+            },
             Token::List(mut tokens) => {
+                self.sub_scope(); // each list has its own scope
                 let func = try!(self.eval_token(tokens.remove(0)));
 
                 match func {
@@ -63,11 +72,19 @@ impl Lisp {
 
                         func(args)
                     },
-                    _ => Err(FuncError::AttemptToCallLiteral),
+                    _ => Err(FuncError::AttemptToCallNonFunction),
                 } 
             },
 			Token::Quoted(tok) => Ok(Value::Quote(*tok)),
         }
+    }
+
+    pub fn set_global<T: ToLisp>(&mut self, name: &str, value: T) {
+        self.scopes[0].set(name, value);
+    }
+
+    pub fn sub_scope(&mut self) {
+        self.scopes.push(Env::new());
     }
 }
 
