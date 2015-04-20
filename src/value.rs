@@ -30,10 +30,13 @@ pub trait FromLisp {
 impl PartialEq for FnWrapper {
     // Checks to see if the addresses of both functions are the same
     fn eq(&self, rhs: &FnWrapper) -> bool {
-        let selfPtr = self as *const Self;
-        let rhsPtr = rhs as *const Self;
+        let &FnWrapper(self_f) = self; 
+        let &FnWrapper(rhs_f) = rhs;
+        
+        let self_ptr = (self_f as *const fn(Vec<Value>) -> FuncResult);
+        let rhs_ptr = (rhs_f as *const fn(Vec<Value>) -> FuncResult);
 
-        selfPtr == rhsPtr
+        self_ptr == rhs_ptr
     }
 }
 
