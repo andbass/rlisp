@@ -111,6 +111,11 @@ impl Lisp {
     pub fn sub_scope(&mut self) {
         self.scopes.push(Env::new());
     }
+
+    pub fn cur_scope(&mut self) -> &mut Env {
+        let index = self.scopes.len() - 1;
+        &mut self.scopes[index]
+    }
 }
 
 impl fmt::Debug for Value {

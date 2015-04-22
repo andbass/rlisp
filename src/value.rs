@@ -96,3 +96,7 @@ impl FromLisp for () {
         }
     }
 }
+
+impl ToLisp for Value {
+    fn to_lisp(self) -> Value { self }
+}

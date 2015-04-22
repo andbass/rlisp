@@ -9,6 +9,7 @@ use eval::FuncError;
 pub enum ParseError {
     UnclosedList,
     InvalidListDelimitter,
+    UnreadableSourceCode,
 }
 
 pub type ParseResult = Result<Token, ParseError>;
@@ -45,8 +46,8 @@ impl Token {
 
 fn preprocess(code: &str) -> VecDeque<String> {
     let string_re = r#""[^"]*""#;
-    let sym_re = r"[!?#\w]+";
-    let num_re = r"\d+\.*\d*e?\d*";
+    let sym_re = r"[-!?#\w]+";
+    let num_re = r"\d+\.?\d*e?\d*";
     let list_re = r"\(|\)";
     let op_re = r"\+|-|\*|/|\^|&|\||=";
 	let quote_re = r"'";
@@ -61,8 +62,6 @@ fn preprocess(code: &str) -> VecDeque<String> {
     let spaced_code = code.to_string()
         .replace("(", " ( ")
         .replace(")", " ) ");
-
-    let spaced_code = spaced_code.trim();
 
     let mut token_strs = VecDeque::new();
 
@@ -81,7 +80,10 @@ pub fn tokenize_str(code: &str) -> ParseResult {
 }
 
 fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
-    let token_str = list.pop_front().unwrap_or(format!("42"));
+    let token_str = match list.pop_front() {
+        Some(string) => string,
+        None => return Err(ParseError::UnreadableSourceCode),
+    };
 
     match &token_str[..] {
         "(" => {
