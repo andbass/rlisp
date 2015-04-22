@@ -1,9 +1,30 @@
 
+use std::rc::Rc;
+
 use parse::Token;
-use eval::{FuncError, FuncResult};
+use eval::{Lisp, FuncError, FuncResult};
+
+pub type RawFunc = fn(Vec<Value>, &mut Lisp) -> FuncResult;
+
+#[derive(Debug, Clone)]
+pub enum Args {
+    Variant, // Any argument length is allowed
+    Fixed(usize), // One possible set of arguments, with N args
+    Multiple(Vec<usize>), // Multiple argument lengths are allowed
+}
 
 #[derive(Clone)]
-pub struct FnWrapper(pub fn(Vec<Value>) -> FuncResult);
+pub struct Func {
+    pub func: Rc<RawFunc>,
+    pub args: Args,
+}
+
+pub fn func(func: RawFunc, args: Args) -> Func {
+    Func {
+        func: Rc::new(func),
+        args: args,
+    }
+}
 
 #[derive(Clone, PartialEq)]
 pub enum Value {
@@ -11,7 +32,8 @@ pub enum Value {
     Bool(bool),
     Str(String),
 
-    HardFunc(FnWrapper),
+    // For some reason, fns that take reference arguments are not clonable on their own
+    HardFunc(Func), 
 
     List(Vec<Value>),
     Nil,
@@ -27,16 +49,11 @@ pub trait FromLisp {
     fn from_lisp(Value) -> Result<Self, FuncError>;
 }
 
-impl PartialEq for FnWrapper {
+impl PartialEq for Func {
     // Checks to see if the addresses of both functions are the same
-    fn eq(&self, rhs: &FnWrapper) -> bool {
-        let &FnWrapper(self_f) = self; 
-        let &FnWrapper(rhs_f) = rhs;
-        
-        let self_ptr = (self_f as *const fn(Vec<Value>) -> FuncResult);
-        let rhs_ptr = (rhs_f as *const fn(Vec<Value>) -> FuncResult);
-
-        self_ptr == rhs_ptr
+    fn eq(&self, rhs: &Func) -> bool {
+        // TEMPORARY
+        return false;
     }
 }
 
@@ -64,7 +81,7 @@ macro_rules! lisp_impl {
 lisp_impl!(bool: Value::Bool, 
           f32: Value::Number, 
           String: Value::Str,
-          FnWrapper: Value::HardFunc,
+          Func: Value::HardFunc,
           Token: Value::Quote);
 
 impl ToLisp for () {

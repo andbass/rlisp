@@ -4,7 +4,7 @@ use std::fmt;
 use std::collections::HashMap;
 
 use parse::{self, Token, ParseError};
-use value::{Value, FromLisp, ToLisp, FnWrapper};
+use value::{Value, Func, Args, FromLisp, ToLisp};
 use env::Env;
 
 pub type FuncResult = Result<Value, FuncError>;
@@ -64,13 +64,38 @@ impl Lisp {
                 let func = try!(self.eval_token(tokens.remove(0)));
 
                 match func {
-                    Value::HardFunc(FnWrapper(func)) => {
+                    Value::HardFunc(hard_func) => {
                         let mut args = Vec::new();
+
                         for token in tokens {
                             args.push(try!(self.eval_token(token)));
                         }
 
-                        func(args)
+                        match hard_func.args {
+                            Args::Variant => (),
+                            Args::Fixed(count) => {
+                                if args.len() != count {
+                                    return Err(FuncError::InvalidArguments);
+                                }
+                            },
+                            Args::Multiple(possible_counts) => {
+                                let mut arg_match = false;
+
+                                // I wish I could label match statements and break out of them...
+                                for count in possible_counts {
+                                    if args.len() == count {
+                                        arg_match = true;
+                                        break;
+                                    }
+                                }
+
+                                if !arg_match {
+                                    return Err(FuncError::InvalidArguments);
+                                }
+                            },
+                        }
+
+                        (hard_func.func)(args, self)
                     },
                     _ => Err(FuncError::AttemptToCallNonFunction),
                 } 
@@ -94,7 +119,7 @@ impl fmt::Debug for Value {
             &Value::List(ref values) => write!(fmt, "{:?}", values),
             &Value::Str(ref string) => write!(fmt, "{:?}", string),
             &Value::Number(num) => write!(fmt, "{}", num),
-            &Value::HardFunc(_) => write!(fmt, "HardFunc"),
+            &Value::HardFunc(ref func) => write!(fmt, "HardFunc({:?})", func.args),
             &Value::Nil => write!(fmt, "nil"),
             &Value::Bool(val) => write!(fmt, "{}", val),
 			&Value::Quote(ref tok) => write!(fmt, "Quote({:?})", tok),

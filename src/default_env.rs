@@ -6,11 +6,11 @@ use std::ops;
 
 use value::{Value, ToLisp, FromLisp};
 use parse::Token;
-use eval::{FuncError, FuncResult};
+use eval::{Lisp, FuncError, FuncResult};
 
 macro_rules! math {
     ($name:ident, $op:path) => {
-        pub fn $name(mut items: Vec<Value>) -> FuncResult {
+        pub fn $name(mut items: Vec<Value>, _: &mut Lisp) -> FuncResult {
             let mut total = match items.remove(0) {
                 Value::Number(n) => n,
                 _ => return Err(FuncError::InvalidArguments),
@@ -30,25 +30,14 @@ macro_rules! math {
     }
 }
 
-pub fn pow(vals: Vec<Value>) -> FuncResult {
-    if vals.len() != 2 {
-        return Err(FuncError::InvalidArguments);
-    }
+pub fn pow(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let base = try!(f32::from_lisp(vals.remove(0)));
+    let exp = try!(f32::from_lisp(vals.remove(0)));
 
-    match vals[0] {
-        Value::Number(base) => {
-            match vals[1] {
-                Value::Number(exp) => {
-                    Ok(base.powf(exp).to_lisp())
-                },
-                _ => return Err(FuncError::InvalidArguments),
-            }
-        },
-        _ => return Err(FuncError::InvalidArguments),
-    }
+    Ok(base.powf(exp).to_lisp())
 }
 
-pub fn print(vals: Vec<Value>) -> FuncResult {
+pub fn print(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     for val in vals {
         match val {
             Value::Str(string) => print!("{}", string),
@@ -60,11 +49,7 @@ pub fn print(vals: Vec<Value>) -> FuncResult {
     Ok(Value::Nil)
 }
 
-pub fn input(mut vals: Vec<Value>) -> FuncResult {
-    if vals.len() > 1 {
-        return Err(FuncError::InvalidArguments);
-    }
-
+pub fn input(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let prompt = if vals.len() == 1 {
         match vals.remove(0) {
             Value::Str(prompt) => prompt,
@@ -92,11 +77,7 @@ pub fn input(mut vals: Vec<Value>) -> FuncResult {
     }
 }
 
-pub fn exit(vals: Vec<Value>) -> FuncResult {
-    if vals.len() > 1 {
-        return Err(FuncError::InvalidArguments);
-    }
-
+pub fn exit(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let exit_code = if vals.len() == 1 {
         match vals[0] {
             Value::Number(code) => code as i32,
@@ -109,7 +90,7 @@ pub fn exit(vals: Vec<Value>) -> FuncResult {
     process::exit(exit_code);
 }
 
-pub fn str_fn(vals: Vec<Value>) -> FuncResult {
+pub fn str_fn(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let mut result = String::new();
 
     for val in vals {
@@ -124,7 +105,7 @@ pub fn str_fn(vals: Vec<Value>) -> FuncResult {
     Ok(result.to_lisp())
 }
 
-pub fn eq(vals: Vec<Value>) -> FuncResult {
+pub fn eq(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     for i in (0 .. vals.len() - 1) {
         if vals[i] != vals[i + 1] {
             return Ok(false.to_lisp());
@@ -134,7 +115,7 @@ pub fn eq(vals: Vec<Value>) -> FuncResult {
     Ok(true.to_lisp())
 }
 
-pub fn and(vals: Vec<Value>) -> FuncResult {
+pub fn and(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     for val in vals {
         match val {
             Value::Bool(val) => {
@@ -149,7 +130,7 @@ pub fn and(vals: Vec<Value>) -> FuncResult {
     Ok(true.to_lisp())
 }
 
-pub fn or(vals: Vec<Value>) -> FuncResult {
+pub fn or(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     for val in vals {
         match val {
             Value::Bool(val) => {
@@ -164,22 +145,14 @@ pub fn or(vals: Vec<Value>) -> FuncResult {
     Ok(false.to_lisp())
 }
 
-pub fn not(vals: Vec<Value>) -> FuncResult {
-    if vals.len() != 1 {
-        return Err(FuncError::InvalidArguments);
-    }
-
+pub fn not(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     match vals[0] {
         Value::Bool(val) => Ok(Value::Bool(!val)),
         _ => Err(FuncError::InvalidArguments),
     }
 }
 
-pub fn cons(mut vals: Vec<Value>) -> FuncResult {
-    if vals.len() != 2 {
-        return Err(FuncError::InvalidArguments);
-    }
-
+pub fn cons(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let head: Token = try!(Token::from_lisp(vals.remove(0)));
     let tail: Token = try!(Token::from_lisp(vals.remove(0)));
 

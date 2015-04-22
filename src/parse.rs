@@ -3,6 +3,8 @@ use regex::Regex;
 
 use std::collections::VecDeque;
 
+use eval::FuncError;
+
 #[derive(Debug, Clone)]
 pub enum ParseError {
     UnclosedList,
@@ -21,6 +23,24 @@ pub enum Token {
     List(Vec<Token>),
 
 	Quoted(Box<Token>),
+}
+
+// This methods return an eval::FuncError to make this easier to use in 
+// foreign functions that manipulate the AST
+impl Token {
+    pub fn as_sym(self) -> Result<String, FuncError> {
+        match self {
+            Sym(sym) => Ok(sym),
+            _ => Err(FuncError::InvalidType),
+        }
+    }
+
+    pub fn as_list(self) -> Result<Vec<Token>, FuncError> {
+        match self {
+            List(list) => Ok(list),
+            _ => Err(FuncError::InvalidType),
+        }
+    }
 }
 
 fn preprocess(code: &str) -> VecDeque<String> {
