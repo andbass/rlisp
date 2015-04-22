@@ -43,7 +43,7 @@ pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
         let sym = try!(list.remove(0).as_sym());
         let value = try!(lisp.eval_token(list.remove(0)));
 
-        lisp.cur_scope().set(&sym, value);
+        lisp.set_global(&sym, value);
     }
 
     Ok(Value::Nil)
