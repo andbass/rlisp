@@ -95,10 +95,14 @@ impl Lisp {
                             },
                         }
 
-                        (hard_func.func)(args, self)
+                        let result = (hard_func.func)(args, self);
+                        self.exit_scope();
+
+                        result
                     },
                     _ => Err(FuncError::AttemptToCallNonFunction),
-                } 
+                }
+
             },
 			Token::Quoted(tok) => Ok(Value::Quote(*tok)),
         }
@@ -110,6 +114,10 @@ impl Lisp {
 
     pub fn sub_scope(&mut self) {
         self.scopes.push(Env::new());
+    }
+
+    pub fn exit_scope(&mut self) {
+        self.scopes.pop();
     }
 
     pub fn cur_scope(&mut self) -> &mut Env {
