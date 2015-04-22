@@ -30,14 +30,14 @@ pub enum Token {
 impl Token {
     pub fn as_sym(self) -> Result<String, FuncError> {
         match self {
-            Sym(sym) => Ok(sym),
+            Token::Sym(sym) => Ok(sym),
             _ => Err(FuncError::InvalidType),
         }
     }
 
     pub fn as_list(self) -> Result<Vec<Token>, FuncError> {
         match self {
-            List(list) => Ok(list),
+            Token::List(list) => Ok(list),
             _ => Err(FuncError::InvalidType),
         }
     }
