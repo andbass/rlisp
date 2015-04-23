@@ -2,6 +2,7 @@
 use regex::Regex;
 
 use std::collections::VecDeque;
+use std::fmt;
 
 use eval::FuncError;
 
@@ -14,7 +15,7 @@ pub enum ParseError {
 
 pub type ParseResult = Result<Token, ParseError>;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum Token {
     Number(f32),
     StrLit(String),
@@ -24,6 +25,26 @@ pub enum Token {
     List(Vec<Token>),
 
 	Quoted(Box<Token>),
+}
+
+impl fmt::Debug for Token {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            &Token::Number(n) => write!(fmt, "{}", n),
+            &Token::StrLit(ref lit) => write!(fmt, "{:?}", lit),
+            &Token::Sym(ref sym) => write!(fmt, "{}", sym),
+            &Token::Quoted(ref quote) => write!(fmt, "'{:?}", quote),
+            &Token::List(ref list) => {
+                write!(fmt, "({:?}", list[0]);
+
+                for token in &list[1..] {
+                    write!(fmt, " {:?}", token);
+                }
+
+                write!(fmt, ")")
+            }
+        }
+    }
 }
 
 // This methods return an eval::FuncError to make this easier to use in 

@@ -17,7 +17,12 @@ fn main() {
         io::stdin().read_line(&mut input).unwrap();
 
         let val = lisp.eval_raw(&input);
-        println!("{:?}\n", val);
+        match val {
+            Ok(val) => println!("{:?}", val),
+            Err(err) => println!("Error: {:?}", err),
+        }
+
+        println!("");
     }
 }
 

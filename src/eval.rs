@@ -150,10 +150,10 @@ impl fmt::Debug for Value {
             &Value::Str(ref string) => write!(fmt, "{:?}", string),
             &Value::Number(num) => write!(fmt, "{}", num),
             &Value::HardFunc(ref func) => write!(fmt, "HardFunc({:?})", func.args),
-            &Value::Lambda { args: ref args, body: ref body }=> write!(fmt, "Lambda({:?} => {:?})", args, body),
+            &Value::Lambda { args: ref args, body: ref body }=> write!(fmt, "λ {:?} => {:?}", args, body),
             &Value::Nil => write!(fmt, "nil"),
             &Value::Bool(val) => write!(fmt, "{}", val),
-			&Value::Quote(ref tok) => write!(fmt, "Quote({:?})", tok),
+			&Value::Quote(ref tok) => write!(fmt, "'{:?}", tok),
         }
     }
 }
