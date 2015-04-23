@@ -103,6 +103,11 @@ impl Lisp {
                         result
                     },
                     Value::Lambda { args: args, body: body } => {
+                        if tokens.len() != args.len() {
+                            self.exit_scope();
+                            return Err(FuncError::InvalidArguments);
+                        }
+
                         for sym in args.iter() {
                             let value = try!(self.eval_token(tokens.remove(0)));
                             self.cur_scope().set(sym, value);
