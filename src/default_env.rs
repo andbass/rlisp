@@ -49,6 +49,28 @@ pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     Ok(Value::Nil)
 }
 
+pub fn lambda(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let args: Token = try!(Token::from_lisp(vals.remove(0)));
+    let body: Token = try!(Token::from_lisp(vals.remove(0)));
+
+    let args = try!(args.as_list());
+
+    let mut arg_strs = Vec::new();
+    for arg in args {
+        arg_strs.push(try!(arg.as_sym()));
+    }
+
+    Ok(Value::Lambda {
+        args: arg_strs,
+        body: body,
+    })
+}
+
+pub fn eval(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let token = try!(Token::from_lisp(vals.remove(0)));
+    lisp.eval_token(token)
+}
+
 pub fn pow(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let base = try!(f32::from_lisp(vals.remove(0)));
     let exp = try!(f32::from_lisp(vals.remove(0)));

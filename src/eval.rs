@@ -75,6 +75,7 @@ impl Lisp {
                             Args::Variant => (),
                             Args::Fixed(count) => {
                                 if args.len() != count {
+                                    self.exit_scope();
                                     return Err(FuncError::InvalidArguments);
                                 }
                             },
@@ -90,6 +91,7 @@ impl Lisp {
                                 }
 
                                 if !arg_match {
+                                    self.exit_scope();
                                     return Err(FuncError::InvalidArguments);
                                 }
                             },
@@ -98,6 +100,16 @@ impl Lisp {
                         let result = (hard_func.func)(args, self);
                         self.exit_scope();
 
+                        result
+                    },
+                    Value::Lambda { args: args, body: body } => {
+                        for sym in args.iter() {
+                            let value = try!(self.eval_token(tokens.remove(0)));
+                            self.cur_scope().set(sym, value);
+                        }
+
+                        let result = self.eval_token(body);
+                        self.exit_scope();
                         result
                     },
                     _ => Err(FuncError::AttemptToCallNonFunction),
@@ -133,6 +145,7 @@ impl fmt::Debug for Value {
             &Value::Str(ref string) => write!(fmt, "{:?}", string),
             &Value::Number(num) => write!(fmt, "{}", num),
             &Value::HardFunc(ref func) => write!(fmt, "HardFunc({:?})", func.args),
+            &Value::Lambda { args: ref args, body: ref body }=> write!(fmt, "Lambda({:?} => {:?})", args, body),
             &Value::Nil => write!(fmt, "nil"),
             &Value::Bool(val) => write!(fmt, "{}", val),
 			&Value::Quote(ref tok) => write!(fmt, "Quote({:?})", tok),

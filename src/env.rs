@@ -26,7 +26,9 @@ impl Env {
         env.set("nil", ());
 
         // Core functions
+        env.set("eval", func(default_env::eval, Args::Fixed(1)));
         env.set("define", func(default_env::define, Args::Variant));
+        env.set("lambda", func(default_env::lambda, Args::Fixed(2)));
 
         // Booleans
         env.set("and", func(default_env::and, Args::Variant));

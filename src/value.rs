@@ -34,6 +34,10 @@ pub enum Value {
 
     // For some reason, fns that take reference arguments are not clonable on their own
     HardFunc(Func), 
+    Lambda { 
+        args: Vec<String>,
+        body: Token,
+    },
 
     List(Vec<Value>),
     Nil,
