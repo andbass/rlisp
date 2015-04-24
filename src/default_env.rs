@@ -32,20 +32,13 @@ macro_rules! math {
 
 // Core functions
 pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    for val in vals {
-        let token = try!(Token::from_lisp(val));
-        let mut list = try!(token.as_list());
+    let sym = try!(Token::from_lisp(vals.remove(0)));
+    let sym = try!(sym.as_sym());
 
-        if list.len() != 2 {
-            return Err(FuncError::InvalidArguments);
-        }
+    let val = vals.remove(0);
 
-        let sym = try!(list.remove(0).as_sym());
-        let value = try!(lisp.eval_token(list.remove(0)));
-
-        lisp.set_global(&sym, value);
-    }
-
+    lisp.set_global(&sym, val);
+    
     Ok(Value::Nil)
 }
 
