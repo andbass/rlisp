@@ -5,6 +5,7 @@ use value::{func, Value, Args, ToLisp};
 use eval::{FuncResult};
 use default_env;
 
+#[derive(Debug)]
 pub struct Env {
     pub map: HashMap<String, Value>,
 }
@@ -27,8 +28,14 @@ impl Env {
 
         // Core functions
         env.set("eval", func(default_env::eval, Args::Fixed(1)));
+        env.set("if", func(default_env::if_fn, Args::Fixed(3)));
         env.set("define", func(default_env::define, Args::Variant));
         env.set("lambda", func(default_env::lambda, Args::Fixed(2)));
+        
+        env.set("scope-trace", func(default_env::scope_trace, Args::Fixed(0)));
+
+        env.set("seq", func(default_env::seq, Args::Variant));
+        env.set("begin", func(default_env::seq, Args::Variant));
 
         // Booleans
         env.set("and", func(default_env::and, Args::Variant));

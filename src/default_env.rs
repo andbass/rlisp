@@ -66,9 +66,50 @@ pub fn lambda(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     })
 }
 
+pub fn if_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let cond: bool = try!(bool::from_lisp(vals.remove(0)));
+    
+    let token = try!(Token::from_lisp(vals.remove(0)));
+    let else_token = try!(Token::from_lisp(vals.remove(0)));
+
+    lisp.eval_token(if cond { 
+        token 
+    } else { 
+        else_token 
+    })
+}
+
 pub fn eval(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let token = try!(Token::from_lisp(vals.remove(0)));
     lisp.eval_token(token)
+}
+
+pub fn seq(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let ret_val = match vals.pop() {
+        Some(val) => val,
+        _ => return Err(FuncError::InvalidArguments),
+    };
+
+    let ret_token = try!(Token::from_lisp(ret_val));
+
+    for val in vals {
+        let token = try!(Token::from_lisp(val.clone()));
+        try!(lisp.eval_token(token));
+    }
+
+    lisp.eval_token(ret_token)
+}
+
+// Prints all variables current being tracked in all scopes, with exception to the global scope
+// (that holds the stdlib)
+pub fn scope_trace(_: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let mut index = 1;
+    for env in &lisp.scopes[1..] {
+        println!("{}: {:?}", index, env.map);
+        index += 1;
+    }
+
+    Ok(Value::Nil)
 }
 
 pub fn pow(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {

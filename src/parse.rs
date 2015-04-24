@@ -13,7 +13,8 @@ pub enum ParseError {
     UnreadableSourceCode,
 }
 
-pub type ParseResult = Result<Token, ParseError>;
+pub type TokenizeResult = Result<Vec<Token>, ParseError>; // result of tokenzing a collection of tokens
+pub type ParseResult = Result<Token, ParseError>; // result of tokenizing a single token
 
 #[derive(Clone, PartialEq)]
 pub enum Token {
@@ -94,12 +95,19 @@ fn preprocess(code: &str) -> VecDeque<String> {
     return token_strs;
 }
 
-pub fn tokenize_str(code: &str) -> ParseResult {
+pub fn tokenize_str(code: &str) -> TokenizeResult {
+    let mut tokens = Vec::new();
+    
     let mut seperated_code = preprocess(code);
 
-    tokenize(&mut seperated_code)
+    while seperated_code.len() > 0 {
+        tokens.push(try!(tokenize(&mut seperated_code)));
+    }
+
+    Ok(tokens)
 }
 
+/// Extracts a single token out of a list of strings, which may contain multiple tokens
 fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
     let token_str = match list.pop_front() {
         Some(string) => string,

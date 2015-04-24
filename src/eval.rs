@@ -1,5 +1,5 @@
 
-use std::io;
+use std::io::{self, Read};
 use std::fmt;
 use std::collections::HashMap;
 
@@ -21,7 +21,7 @@ pub enum FuncError {
 }
 
 pub struct Lisp {
-    scopes: Vec<Env>,
+    pub scopes: Vec<Env>,
 }
 
 impl Lisp {
@@ -37,13 +37,29 @@ impl Lisp {
         return T::from_lisp(result);
     }
 
+    pub fn eval_reader<R: Read>(&mut self, mut code: R) -> FuncResult {
+        let mut read_string = String::new();
+        code.read_to_string(&mut read_string);
+
+        self.eval_raw(&read_string)
+    }
+
     pub fn eval_raw(&mut self, code: &str) -> FuncResult {
-        let mut token = match parse::tokenize_str(code) {
+        let mut tokens = match parse::tokenize_str(code) {
             Ok(tok) => tok,
             Err(err) => return Err(FuncError::ParsingErr(err)),
         };
 
-        self.eval_token(token)
+        let ret_token = match tokens.pop() {
+            Some(token) => token,
+            None => unreachable!(),
+        };
+
+        for token in tokens {
+            self.eval_token(token.clone());
+        }
+
+        self.eval_token(ret_token)
     }
 
     pub fn eval_token(&mut self, token: Token) -> FuncResult {
