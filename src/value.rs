@@ -9,8 +9,9 @@ pub type RawFunc = fn(Vec<Value>, &mut Lisp) -> FuncResult;
 #[derive(Debug, Clone)]
 pub enum Args {
     Variant, // Any argument length is allowed
-    Fixed(usize), // One possible set of arguments, with N args
+    Fixed(usize), // One possible number of arguments
     Multiple(Vec<usize>), // Multiple argument lengths are allowed
+    Atleast(usize), // Must contain this many or greater args
 }
 
 #[derive(Clone)]
@@ -36,7 +37,7 @@ pub enum Value {
     HardFunc(Func), 
     Lambda { 
         args: Vec<String>,
-        body: Token,
+        body: Vec<Token>,
     },
 
     List(Vec<Value>),

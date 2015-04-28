@@ -11,18 +11,10 @@ use eval::{Lisp, FuncError, FuncResult};
 macro_rules! math {
     ($name:ident, $op:path) => {
         pub fn $name(mut items: Vec<Value>, _: &mut Lisp) -> FuncResult {
-            let mut total = match items.remove(0) {
-                Value::Number(n) => n,
-                _ => return Err(FuncError::InvalidArguments),
-            };
+            let mut total = try!(f32::from_lisp(items.remove(0)));
 
             for item in items {
-                match item {
-                    Value::Number(next) => {
-                        total = $op(total, next);
-                    },
-                    _ => return Err(FuncError::InvalidArguments),
-                }
+                total = $op(total, try!(f32::from_lisp(item.clone())));
             }
 
             Ok(total.to_lisp())
@@ -44,7 +36,12 @@ pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 
 pub fn lambda(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let args: Token = try!(Token::from_lisp(vals.remove(0)));
-    let body: Token = try!(Token::from_lisp(vals.remove(0)));
+
+    let mut body = Vec::new();
+    for val in vals {
+        let token = try!(Token::from_lisp(val.clone()));
+        body.push(token); 
+    }
 
     let args = try!(args.as_list());
 
@@ -78,10 +75,7 @@ pub fn eval(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 }
 
 pub fn seq(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    let ret_val = match vals.pop() {
-        Some(val) => val,
-        _ => return Err(FuncError::InvalidArguments),
-    };
+    let ret_val = vals.remove(0);
 
     let ret_token = try!(Token::from_lisp(ret_val));
 
@@ -128,7 +122,7 @@ pub fn input(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let prompt = if vals.len() == 1 {
         match vals.remove(0) {
             Value::Str(prompt) => prompt,
-            _ => return Err(FuncError::InvalidArguments),
+            _ => return Err(FuncError::InvalidType),
         }
     } else {
         "".to_string()
@@ -156,7 +150,7 @@ pub fn exit(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let exit_code = if vals.len() == 1 {
         match vals[0] {
             Value::Number(code) => code as i32,
-            _ => return Err(FuncError::InvalidArguments),
+            _ => return Err(FuncError::InvalidType),
         }
     } else {
         0
@@ -192,13 +186,10 @@ pub fn eq(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 
 pub fn and(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     for val in vals {
-        match val {
-            Value::Bool(val) => {
-                if !val {
-                    return Ok(false.to_lisp());
-                }
-            },
-            _ => return Err(FuncError::InvalidArguments),
+        let bool_val = try!(bool::from_lisp(val.clone()));
+
+        if !bool_val {
+            return Ok(false.to_lisp());
         }
     }
 
@@ -207,34 +198,26 @@ pub fn and(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 
 pub fn or(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     for val in vals {
-        match val {
-            Value::Bool(val) => {
-                if val {
-                    return Ok(true.to_lisp());
-                }
-            },
-            _ => return Err(FuncError::InvalidArguments),
+        let bool_val = try!(bool::from_lisp(val.clone()));
+
+        if bool_val {
+            return Ok(true.to_lisp());
         }
     }
 
     Ok(false.to_lisp())
 }
 
-pub fn not(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    match vals[0] {
-        Value::Bool(val) => Ok(Value::Bool(!val)),
-        _ => Err(FuncError::InvalidArguments),
-    }
+pub fn not(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let bool_val = try!(bool::from_lisp(vals.remove(0)));
+    Ok((!bool_val).to_lisp())
 }
 
 pub fn cons(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let head: Token = try!(Token::from_lisp(vals.remove(0)));
     let tail: Token = try!(Token::from_lisp(vals.remove(0)));
 
-    let mut tail_tokens = match tail {
-        Token::List(toks) => toks,
-        _ => return Err(FuncError::InvalidArguments),
-    };
+    let mut tail_tokens = try!(tail.as_list());
 
     tail_tokens.insert(0, head);
 

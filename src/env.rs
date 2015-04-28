@@ -29,13 +29,13 @@ impl Env {
         // Core functions
         env.set("eval", func(default_env::eval, Args::Fixed(1)));
         env.set("if", func(default_env::if_fn, Args::Fixed(3)));
-        env.set("define", func(default_env::define, Args::Variant));
-        env.set("lambda", func(default_env::lambda, Args::Fixed(2)));
+        env.set("define", func(default_env::define, Args::Fixed(2)));
+        env.set("lambda", func(default_env::lambda, Args::Atleast(2)));
         
         env.set("scope-trace", func(default_env::scope_trace, Args::Fixed(0)));
 
-        env.set("seq", func(default_env::seq, Args::Variant));
-        env.set("begin", func(default_env::seq, Args::Variant));
+        env.set("seq", func(default_env::seq, Args::Atleast(1)));
+        env.set("begin", func(default_env::seq, Args::Atleast(1)));
 
         // Booleans
         env.set("and", func(default_env::and, Args::Variant));
@@ -43,12 +43,12 @@ impl Env {
         env.set("not", func(default_env::not, Args::Fixed(1)));
 
         // Ops
-        env.set("+", func(default_env::add, Args::Variant));
-        env.set("-", func(default_env::sub, Args::Variant));
-        env.set("*", func(default_env::mul, Args::Variant));
-        env.set("/", func(default_env::div, Args::Variant));
+        env.set("+", func(default_env::add, Args::Atleast(2)));
+        env.set("-", func(default_env::sub, Args::Atleast(2)));
+        env.set("*", func(default_env::mul, Args::Atleast(2)));
+        env.set("/", func(default_env::div, Args::Atleast(2)));
         env.set("pow", func(default_env::pow, Args::Fixed(2)));
-        env.set("=", func(default_env::eq, Args::Variant));
+        env.set("=", func(default_env::eq, Args::Atleast(2)));
 
         env.set("print", func(default_env::print, Args::Variant));
         env.set("input", func(default_env::input, Args::Multiple(vec![0, 1])));

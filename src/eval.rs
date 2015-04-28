@@ -7,11 +7,24 @@ use parse::{self, Token, ParseError};
 use value::{Value, Func, Args, FromLisp, ToLisp};
 use env::Env;
 
+macro_rules! invalid_args {
+    ($lisp:expr, $expected:expr, $args:expr) => {
+        $lisp.exit_scope();
+        return Err(FuncError::InvalidArguments {
+            expected: $expected,
+            got: $args.len(),
+        });
+    }
+}
+
 pub type FuncResult = Result<Value, FuncError>;
 
 #[derive(Debug)]
 pub enum FuncError {
-    InvalidArguments,
+    InvalidArguments {
+        expected: Args,
+        got: usize,
+    },
     InvalidType,
     UndeclaredSymbol(String),
     AttemptToCallNonFunction,
@@ -50,6 +63,10 @@ impl Lisp {
             Err(err) => return Err(FuncError::ParsingErr(err)),
         };
 
+        self.eval_token_vec(tokens)
+    }
+
+    pub fn eval_token_vec(&mut self, mut tokens: Vec<Token>) -> FuncResult {
         let ret_token = match tokens.pop() {
             Some(token) => token,
             None => unreachable!(),
@@ -91,26 +108,29 @@ impl Lisp {
                             Args::Variant => (),
                             Args::Fixed(count) => {
                                 if args.len() != count {
-                                    self.exit_scope();
-                                    return Err(FuncError::InvalidArguments);
+                                    invalid_args!(self, Args::Fixed(count), args);
                                 }
                             },
                             Args::Multiple(possible_counts) => {
                                 let mut arg_match = false;
 
                                 // I wish I could label match statements and break out of them...
-                                for count in possible_counts {
-                                    if args.len() == count {
+                                for count in &possible_counts {
+                                    if args.len() == *count {
                                         arg_match = true;
                                         break;
                                     }
                                 }
 
                                 if !arg_match {
-                                    self.exit_scope();
-                                    return Err(FuncError::InvalidArguments);
+                                    invalid_args!(self, Args::Multiple(possible_counts), args);
                                 }
                             },
+                            Args::Atleast(count) => {
+                                if args.len() < count {
+                                    invalid_args!(self, Args::Atleast(count), args);
+                                }
+                            }
                         }
 
                         let result = (hard_func.func)(args, self);
@@ -120,8 +140,7 @@ impl Lisp {
                     },
                     Value::Lambda { args: args, body: body } => {
                         if tokens.len() != args.len() {
-                            self.exit_scope();
-                            return Err(FuncError::InvalidArguments);
+                            invalid_args!(self, Args::Fixed(args.len()), tokens);
                         }
 
                         for sym in args.iter() {
@@ -129,7 +148,7 @@ impl Lisp {
                             self.cur_scope().set(sym, value);
                         }
 
-                        let result = self.eval_token(body);
+                        let result = self.eval_token_vec(body);
                         self.exit_scope();
                         result
                     },
