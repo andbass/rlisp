@@ -150,6 +150,7 @@ impl Lisp {
 
                         let result = self.eval_token_vec(body);
                         self.exit_scope();
+
                         result
                     },
                     _ => Err(FuncError::AttemptToCallNonFunction),

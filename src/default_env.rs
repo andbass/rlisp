@@ -14,7 +14,7 @@ macro_rules! math {
             let mut total = try!(f32::from_lisp(items.remove(0)));
 
             for item in items {
-                total = $op(total, try!(f32::from_lisp(item.clone())));
+                total = $op(total, try!(f32::from_lisp(item)));
             }
 
             Ok(total.to_lisp())
@@ -39,7 +39,7 @@ pub fn lambda(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 
     let mut body = Vec::new();
     for val in vals {
-        let token = try!(Token::from_lisp(val.clone()));
+        let token = try!(Token::from_lisp(val));
         body.push(token); 
     }
 
@@ -80,7 +80,7 @@ pub fn seq(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let ret_token = try!(Token::from_lisp(ret_val));
 
     for val in vals {
-        let token = try!(Token::from_lisp(val.clone()));
+        let token = try!(Token::from_lisp(val));
         try!(lisp.eval_token(token));
     }
 
@@ -186,7 +186,7 @@ pub fn eq(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 
 pub fn and(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     for val in vals {
-        let bool_val = try!(bool::from_lisp(val.clone()));
+        let bool_val = try!(bool::from_lisp(val));
 
         if !bool_val {
             return Ok(false.to_lisp());
@@ -198,7 +198,7 @@ pub fn and(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 
 pub fn or(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     for val in vals {
-        let bool_val = try!(bool::from_lisp(val.clone()));
+        let bool_val = try!(bool::from_lisp(val));
 
         if bool_val {
             return Ok(true.to_lisp());
