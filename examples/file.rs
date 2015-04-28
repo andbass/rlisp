@@ -7,7 +7,7 @@ use rlisp::Lisp;
 
 fn main() {
     let mut lisp = Lisp::new();
-    let mut file = File::open("example.scm").unwrap();
+    let mut file = File::open("example.lisp").unwrap();
 
     println!("{:?}", lisp.eval_reader(file));
 }

@@ -3,26 +3,46 @@ extern crate rlisp;
 extern crate toml;
 
 use rlisp::Lisp;
+use rlisp::eval::{FuncResult, FuncError};
+use rlisp::parse::{ParseError};
 
 use std::io::{self, Read, Write};
 
 fn main() {
     let mut lisp = Lisp::new();
+    let prompt = format!("rlisp {} > ", get_version());
     
     loop {
-        print!("rlisp {} > ", get_version());
-        io::stdout().flush().unwrap();
+        let input = read(&prompt);
+        let result = eval(input, &mut lisp);
 
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).unwrap();
-
-        let val = lisp.eval_raw(&input);
-        match val {
-            Ok(val) => println!("{:?}", val),
-            Err(err) => println!("Error: {:?}", err),
-        }
-
+        println!("=> {:?}", result);
         println!("");
+    }
+}
+
+fn read(prompt: &str) -> String {
+    print!("{}", prompt);
+    io::stdout().flush().unwrap();
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+
+    input
+}
+
+fn eval(mut input: String, lisp: &mut Lisp) -> FuncResult {
+    let val = lisp.eval_raw(&input);
+    
+    match val {
+        Ok(val) => Ok(val),
+        Err(err) => match err {
+            FuncError::ParsingErr(ParseError::UnclosedList) => {
+                input.push_str(&read(">\t\t"));
+                eval(input, lisp)
+            },
+            _ => Err(err),
+        }
     }
 }
 

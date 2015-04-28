@@ -13,6 +13,33 @@ pub enum ParseError {
     UnreadableSourceCode,
 }
 
+#[derive(Debug, Clone)]
+pub struct FilePos {
+    line: usize,
+    col: usize,
+}
+
+impl FilePos {
+    fn from_offset(text: &str, mut offset: usize) -> FilePos {
+        let mut line_no = 1;
+       
+        for (cur_offset, ch) in text.bytes().enumerate() {
+            if cur_offset >= offset {
+                break;
+            }
+
+            if ch == '\n' as u8 {
+                line_no += 1;
+            }
+        }
+
+        FilePos {
+            line: line_no,
+            col: 0,
+        }
+    }
+}
+
 pub type TokenizeResult = Result<Vec<Token>, ParseError>; // result of tokenzing a collection of tokens
 pub type ParseResult = Result<Token, ParseError>; // result of tokenizing a single token
 
@@ -70,7 +97,7 @@ fn preprocess(code: &str) -> VecDeque<String> {
     let string_re = r#""[^"]*""#;
     let sym_re = r"[-!?#\w]+";
     let num_re = r"\d+\.?\d*e?\d*";
-    let list_re = r"\(|\)";
+    let list_re = r"[(){}]";
     let op_re = r"\+|-|\*|/|\^|&|\||=";
 	let quote_re = r"'";
     
@@ -88,7 +115,9 @@ fn preprocess(code: &str) -> VecDeque<String> {
     let mut token_strs = VecDeque::new();
 
     for cap in re.captures_iter(&spaced_code) {
+        let (offset, _) = cap.pos(0).unwrap_or((0, 0));
         let match_str = cap.at(0).unwrap_or("");
+
         token_strs.push_back(match_str.to_string());
     }
 
@@ -115,22 +144,15 @@ fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
     };
 
     match &token_str[..] {
-        "(" => {
-            let mut tokens = Vec::new();
-
-            while let Some(item_str) = list.pop_front() {
-                if &item_str[..] == ")" {
-                    return Ok(Token::List(tokens));
-                }
-
-                // If not the end of the list, push the item back and continue to process the list
-                list.push_front(item_str);
-                tokens.push(try!(tokenize(list)));
-            }
-
-            Err(ParseError::UnclosedList)
+        "(" => { 
+            let tokens = try!(tokenize_list(list, ")"));
+            Ok(Token::List(tokens))
         },
-        ")" => Err(ParseError::InvalidListDelimitter),
+        "{" => {
+            let tokens = try!(tokenize_list(list, "}"));
+            Ok(Token::Quoted(box Token::List(tokens)))
+        },
+        ")" | "}" => Err(ParseError::InvalidListDelimitter),
 		r"'" => {
 			let token = try!(tokenize(list));
 			Ok(Token::Quoted(box token))
@@ -147,6 +169,22 @@ fn tokenize_atom(atom: String) -> Token {
     } else {
         Token::Sym(atom.to_string())
     }
+}
+
+fn tokenize_list(list: &mut VecDeque<String>, delimit: &str) -> Result<Vec<Token>, ParseError> {
+    let mut tokens = Vec::new();
+
+    while let Some(item_str) = list.pop_front() {
+        if &item_str[..] == delimit {
+            return Ok(tokens);
+        }
+
+        // If not the end of the list, push the item back and continue to process the list
+        list.push_front(item_str);
+        tokens.push(try!(tokenize(list)));
+    }
+
+    Err(ParseError::UnclosedList)
 }
 
 fn string_lit(slice: &str) -> Option<String> {

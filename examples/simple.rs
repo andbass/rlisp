@@ -12,7 +12,7 @@ fn main() {
 
 fn tokenize_test(mut lisp: Lisp) {
     let code = r#"
-        (cons 'a '(b c))
+        (+ 2 2)
     "#;
 
     println!("{:?}", rlisp::parse::tokenize_str(code));
