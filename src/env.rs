@@ -28,13 +28,12 @@ impl Env {
         // Core functions
         env.set("eval", func(default_env::eval, Args::Fixed(1)));
         env.set("if", func(default_env::if_fn, Args::Fixed(3)));
-        env.set("define", func(default_env::define, Args::Fixed(2)));
+        env.set("define", func(default_env::define, Args::Atleast(2)));
         env.set("lambda", func(default_env::lambda, Args::Atleast(2)));
         
         env.set("scope-trace", func(default_env::scope_trace, Args::Fixed(0)));
 
         env.set("seq", func(default_env::seq, Args::Atleast(1)));
-        env.set("begin", func(default_env::seq, Args::Atleast(1)));
 
         // Booleans
         env.set("and", func(default_env::and, Args::Variant));

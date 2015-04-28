@@ -28,7 +28,7 @@ pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 
     let val = vals.remove(0);
 
-    lisp.set_global(&sym, val);
+    lisp.cur_scope().set(&sym, val);
     
     Ok(Value::Nil)
 }

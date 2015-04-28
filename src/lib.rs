@@ -3,6 +3,16 @@
 
 extern crate regex;
 
+macro_rules! invalid_args {
+    ($lisp:expr, $expected:expr, $args:expr) => {
+        $lisp.exit_scope();
+        return Err(FuncError::InvalidArguments {
+            expected: $expected,
+            got: $args.len(),
+        });
+    }
+}
+
 pub mod parse;
 pub mod eval;
 pub mod value;
