@@ -10,10 +10,10 @@ use std::io::{self, Read, Write};
 
 fn main() {
     let mut lisp = Lisp::new();
-    let prompt = format!("rlisp {} > ", get_version());
+    println!("rlisp {}", get_version());
     
     loop {
-        let input = read(&prompt);
+        let input = read(">>> ");
         let result = eval(input, &mut lisp);
 
         println!("=> {:?}", result);
@@ -38,7 +38,7 @@ fn eval(mut input: String, lisp: &mut Lisp) -> FuncResult {
         Ok(val) => Ok(val),
         Err(err) => match err {
             FuncError::ParsingErr(ParseError::UnclosedList) => {
-                input.push_str(&read(">\t\t"));
+                input.push_str(&read("... "));
                 eval(input, lisp)
             },
             _ => Err(err),

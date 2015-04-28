@@ -97,7 +97,7 @@ fn preprocess(code: &str) -> VecDeque<String> {
     let string_re = r#""[^"]*""#;
     let sym_re = r"[-!?#\w]+";
     let num_re = r"\d+\.?\d*e?\d*";
-    let list_re = r"[(){}]";
+    let list_re = r"[(){}\[\]]";
     let op_re = r"\+|-|\*|/|\^|&|\||=";
 	let quote_re = r"'";
     
@@ -148,11 +148,11 @@ fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
             let tokens = try!(tokenize_list(list, ")"));
             Ok(Token::List(tokens))
         },
-        "{" => {
-            let tokens = try!(tokenize_list(list, "}"));
+        "[" => {
+            let tokens = try!(tokenize_list(list, "]"));
             Ok(Token::Quoted(box Token::List(tokens)))
         },
-        ")" | "}" => Err(ParseError::InvalidListDelimitter),
+        ")" | "]" => Err(ParseError::InvalidListDelimitter),
 		r"'" => {
 			let token = try!(tokenize(list));
 			Ok(Token::Quoted(box token))
