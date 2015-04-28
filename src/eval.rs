@@ -1,7 +1,6 @@
 
 use std::io::{self, Read};
 use std::fmt;
-use std::collections::HashMap;
 
 use parse::{self, Token, ParseError};
 use value::{Value, Func, Args, FromLisp, ToLisp};
@@ -52,13 +51,16 @@ impl Lisp {
 
     pub fn eval_reader<R: Read>(&mut self, mut code: R) -> FuncResult {
         let mut read_string = String::new();
-        code.read_to_string(&mut read_string);
+        match code.read_to_string(&mut read_string) {
+            Ok(_) => (),
+            Err(err) => return Err(FuncError::IoError(err)),
+        }
 
         self.eval_raw(&read_string)
     }
 
     pub fn eval_raw(&mut self, code: &str) -> FuncResult {
-        let mut tokens = match parse::tokenize_str(code) {
+        let tokens = match parse::tokenize_str(code) {
             Ok(tok) => tok,
             Err(err) => return Err(FuncError::ParsingErr(err)),
         };
@@ -138,7 +140,7 @@ impl Lisp {
 
                         result
                     },
-                    Value::Lambda { args: args, body: body } => {
+                    Value::Lambda { args, body } => {
                         if tokens.len() != args.len() {
                             invalid_args!(self, Args::Fixed(args.len()), tokens);
                         }
@@ -186,7 +188,7 @@ impl fmt::Debug for Value {
             &Value::Str(ref string) => write!(fmt, "{:?}", string),
             &Value::Number(num) => write!(fmt, "{}", num),
             &Value::HardFunc(ref func) => write!(fmt, "HardFunc({:?})", func.args),
-            &Value::Lambda { args: ref args, body: ref body }=> write!(fmt, "λ {:?} => {:?}", args, body),
+            &Value::Lambda { ref args, ref body }=> write!(fmt, "λ {:?} => {:?}", args, body),
             &Value::Nil => write!(fmt, "nil"),
             &Value::Bool(val) => write!(fmt, "{}", val),
 			&Value::Quote(ref tok) => write!(fmt, "'{:?}", tok),

@@ -1,7 +1,6 @@
 
 use std::process;
-use std::collections::HashMap;
-use std::io::{self, Read, Write};
+use std::io::{self, Write};
 use std::ops;
 
 use value::{Value, ToLisp, FromLisp};
@@ -34,7 +33,7 @@ pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     Ok(Value::Nil)
 }
 
-pub fn lambda(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let args: Token = try!(Token::from_lisp(vals.remove(0)));
 
     let mut body = Vec::new();
@@ -99,14 +98,14 @@ pub fn scope_trace(_: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     Ok(Value::Nil)
 }
 
-pub fn pow(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn pow(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let base = try!(f32::from_lisp(vals.remove(0)));
     let exp = try!(f32::from_lisp(vals.remove(0)));
 
     Ok(base.powf(exp).to_lisp())
 }
 
-pub fn print(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn print(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     for val in vals {
         match val {
             Value::Str(string) => print!("{}", string),
@@ -118,7 +117,7 @@ pub fn print(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     Ok(Value::Nil)
 }
 
-pub fn input(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn input(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let prompt = if vals.len() == 1 {
         match vals.remove(0) {
             Value::Str(prompt) => prompt,
@@ -146,7 +145,7 @@ pub fn input(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     }
 }
 
-pub fn exit(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn exit(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let exit_code = if vals.len() == 1 {
         match vals[0] {
             Value::Number(code) => code as i32,
@@ -159,7 +158,7 @@ pub fn exit(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     process::exit(exit_code);
 }
 
-pub fn str_fn(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn str_fn(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let mut result = String::new();
 
     for val in vals {
@@ -174,7 +173,7 @@ pub fn str_fn(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     Ok(result.to_lisp())
 }
 
-pub fn eq(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn eq(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     for i in (0 .. vals.len() - 1) {
         if vals[i] != vals[i + 1] {
             return Ok(false.to_lisp());
@@ -184,7 +183,7 @@ pub fn eq(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     Ok(true.to_lisp())
 }
 
-pub fn and(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn and(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     for val in vals {
         let bool_val = try!(bool::from_lisp(val));
 
@@ -196,7 +195,7 @@ pub fn and(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     Ok(true.to_lisp())
 }
 
-pub fn or(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn or(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     for val in vals {
         let bool_val = try!(bool::from_lisp(val));
 
@@ -208,12 +207,12 @@ pub fn or(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     Ok(false.to_lisp())
 }
 
-pub fn not(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn not(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let bool_val = try!(bool::from_lisp(vals.remove(0)));
     Ok((!bool_val).to_lisp())
 }
 
-pub fn cons(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn cons(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let head: Token = try!(Token::from_lisp(vals.remove(0)));
     let tail: Token = try!(Token::from_lisp(vals.remove(0)));
 

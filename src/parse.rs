@@ -105,7 +105,7 @@ fn preprocess(code: &str) -> VecDeque<String> {
 
     let re = match Regex::new(&regex) {
         Ok(re) => re,
-        Err(e) => return VecDeque::new(),
+        Err(_) => return VecDeque::new(),
     };
 
     let spaced_code = code.to_string()

@@ -1,5 +1,5 @@
 
-#![feature(str_words, box_syntax, core)]
+#![feature(box_syntax)]
 
 extern crate regex;
 

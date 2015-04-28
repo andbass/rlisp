@@ -2,7 +2,6 @@
 use std::collections::HashMap;
 
 use value::{func, Value, Args, ToLisp};
-use eval::{FuncResult};
 use default_env;
 
 #[derive(Debug)]

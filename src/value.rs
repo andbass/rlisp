@@ -6,7 +6,7 @@ use eval::{Lisp, FuncError, FuncResult};
 
 pub type RawFunc = fn(Vec<Value>, &mut Lisp) -> FuncResult;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Args {
     Variant, // Any argument length is allowed
     Fixed(usize), // One possible number of arguments
@@ -57,7 +57,13 @@ pub trait FromLisp {
 impl PartialEq for Func {
     // Checks to see if the addresses of both functions are the same
     fn eq(&self, rhs: &Func) -> bool {
-        // TEMPORARY
+        if self.args == rhs.args {
+            let f1 = *self.func as *const fn(Vec<Value>, &mut Lisp) -> FuncResult;
+            let f2 = *rhs.func as *const fn(Vec<Value>, &mut Lisp) -> FuncResult;
+
+            return f1 == f2;
+        }
+         
         return false;
     }
 }
