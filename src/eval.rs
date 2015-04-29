@@ -1,20 +1,12 @@
 
 use std::io::{self, Read};
+use std::cmp;
 use std::fmt;
 
 use parse::{self, Token, ParseError};
 use value::{Value, Func, Args, FromLisp, ToLisp};
 use env::Env;
 
-macro_rules! invalid_args {
-    ($lisp:expr, $expected:expr, $args:expr) => {
-        $lisp.exit_scope();
-        return Err(FuncError::InvalidArguments {
-            expected: $expected,
-            got: $args.len(),
-        });
-    }
-}
 
 pub type FuncResult = Result<Value, FuncError>;
 
@@ -74,11 +66,13 @@ impl Lisp {
             None => unreachable!(),
         };
 
+        let ret_val = self.eval_token(ret_token);
+
         for token in tokens {
-            self.eval_token(token.clone());
+            self.eval_token(token);
         }
 
-        self.eval_token(ret_token)
+        ret_val
     }
 
     pub fn eval_token(&mut self, token: Token) -> FuncResult {
@@ -176,7 +170,7 @@ impl Lisp {
     }
 
     pub fn cur_scope(&mut self) -> &mut Env {
-        let index = self.scopes.len() - 1;
+        let index = cmp::max(self.scopes.len() as i32 - 2, 0) as usize;
         &mut self.scopes[index]
     }
 }
@@ -195,4 +189,3 @@ impl fmt::Debug for Value {
         }
     }
 }
-

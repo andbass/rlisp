@@ -16,7 +16,11 @@ fn main() {
         let input = read(">>> ");
         let result = eval(input, &mut lisp);
 
-        println!("=> {:?}", result);
+        match result {
+            Ok(val) => println!("=> {:?}", val),
+            Err(err) => println!("Error: {:?}", err),
+        }
+
         println!("");
     }
 }

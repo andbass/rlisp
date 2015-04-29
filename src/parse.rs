@@ -43,6 +43,12 @@ impl FilePos {
 pub type TokenizeResult = Result<Vec<Token>, ParseError>; // result of tokenzing a collection of tokens
 pub type ParseResult = Result<Token, ParseError>; // result of tokenizing a single token
 
+const LIST_OPEN: &'static str = "(";
+const LIST_CLOSE: &'static str = ")";
+
+const QUOTE_OPEN: &'static str = "{";
+const QUOTE_CLOSE: &'static str = "}";
+
 #[derive(Clone, PartialEq)]
 pub enum Token {
     Number(f32),
@@ -144,15 +150,15 @@ fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
     };
 
     match &token_str[..] {
-        "(" => { 
-            let tokens = try!(tokenize_list(list, ")"));
+        LIST_OPEN => { 
+            let tokens = try!(tokenize_list(list, LIST_CLOSE));
             Ok(Token::List(tokens))
         },
-        "[" => {
-            let tokens = try!(tokenize_list(list, "]"));
+        QUOTE_OPEN => {
+            let tokens = try!(tokenize_list(list, QUOTE_CLOSE));
             Ok(Token::Quoted(box Token::List(tokens)))
         },
-        ")" | "]" => Err(ParseError::InvalidListDelimitter),
+        LIST_CLOSE | QUOTE_CLOSE => Err(ParseError::InvalidListDelimitter),
 		r"'" => {
 			let token = try!(tokenize(list));
 			Ok(Token::Quoted(box token))

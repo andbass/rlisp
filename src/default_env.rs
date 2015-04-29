@@ -46,7 +46,8 @@ pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
 
     let mut arg_strs = Vec::new();
     for arg in args {
-        arg_strs.push(try!(arg.as_sym()));
+        let sym = try!(arg.as_sym());
+        arg_strs.push(sym);
     }
 
     Ok(Value::Lambda {
@@ -74,16 +75,13 @@ pub fn eval(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 }
 
 pub fn seq(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    let ret_val = vals.remove(0);
-
-    let ret_token = try!(Token::from_lisp(ret_val));
+    let mut tokens = Vec::new();
 
     for val in vals {
-        let token = try!(Token::from_lisp(val));
-        try!(lisp.eval_token(token));
+        tokens.push(try!(Token::from_lisp(val)));
     }
 
-    lisp.eval_token(ret_token)
+    lisp.eval_token_vec(tokens)
 }
 
 // Prints all variables current being tracked in all scopes, with exception to the global scope
@@ -210,6 +208,10 @@ pub fn or(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
 pub fn not(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let bool_val = try!(bool::from_lisp(vals.remove(0)));
     Ok((!bool_val).to_lisp())
+}
+
+pub fn list(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    Ok(Value::List(vals))
 }
 
 pub fn cons(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {

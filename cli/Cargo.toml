@@ -1,0 +1,4 @@
+[package]
+name = "cli"
+version = "0.1.0"
+authors = ["Andrew Bass <andybass009@gmail.com>"]

@@ -56,6 +56,7 @@ impl Env {
         env.set("str", func(default_env::str_fn, Args::Variant));
 
         // List ops
+        env.set("list", func(default_env::list, Args::Variant));
         env.set("cons", func(default_env::cons, Args::Fixed(2)));
 
         env
