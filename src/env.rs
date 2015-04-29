@@ -30,8 +30,6 @@ impl Env {
         env.set("if", func(default_env::if_fn, Args::Fixed(3)));
         env.set("define", func(default_env::define, Args::Atleast(2)));
         env.set("lambda", func(default_env::lambda, Args::Atleast(2)));
-        
-        env.set("scope-trace", func(default_env::scope_trace, Args::Fixed(0)));
 
         env.set("seq", func(default_env::seq, Args::Atleast(1)));
 
@@ -45,7 +43,6 @@ impl Env {
         env.set("-", func(default_env::sub, Args::Atleast(2)));
         env.set("*", func(default_env::mul, Args::Atleast(2)));
         env.set("/", func(default_env::div, Args::Atleast(2)));
-        env.set("pow", func(default_env::pow, Args::Fixed(2)));
         env.set("=", func(default_env::eq, Args::Atleast(2)));
 
         env.set("print", func(default_env::print, Args::Variant));
@@ -57,7 +54,6 @@ impl Env {
 
         // List ops
         env.set("list", func(default_env::list, Args::Variant));
-        env.set("cons", func(default_env::cons, Args::Fixed(2)));
 
         env
     }

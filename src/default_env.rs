@@ -4,7 +4,6 @@ use std::io::{self, Write};
 use std::ops;
 
 use value::{Value, ToLisp, FromLisp};
-use parse::Token;
 use eval::{Lisp, FuncError, FuncResult};
 
 macro_rules! math {
@@ -23,8 +22,7 @@ macro_rules! math {
 
 // Core functions
 pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    let sym = try!(Token::from_lisp(vals.remove(0)));
-    let sym = try!(sym.as_sym());
+    let sym = try!(vals.remove(0).as_sym());
 
     let val = vals.remove(0);
 
@@ -34,11 +32,11 @@ pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 }
 
 pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
-    let args: Token = try!(Token::from_lisp(vals.remove(0)));
+    let args = try!(vals.remove(0).unquote());
 
     let mut body = Vec::new();
     for val in vals {
-        let token = try!(Token::from_lisp(val));
+        let token = try!(val.unquote());
         body.push(token); 
     }
 
@@ -59,8 +57,8 @@ pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
 pub fn if_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let cond: bool = try!(bool::from_lisp(vals.remove(0)));
     
-    let token = try!(Token::from_lisp(vals.remove(0)));
-    let else_token = try!(Token::from_lisp(vals.remove(0)));
+    let token = try!(vals.remove(0).unquote());
+    let else_token = try!(vals.remove(0).unquote());
 
     lisp.eval_token(if cond { 
         token 
@@ -70,37 +68,18 @@ pub fn if_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 }
 
 pub fn eval(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    let token = try!(Token::from_lisp(vals.remove(0)));
-    lisp.eval_token(token)
+    let unquoted = try!(vals.remove(0).unquote());
+    lisp.eval_token(unquoted)
 }
 
-pub fn seq(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn seq(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let mut tokens = Vec::new();
 
     for val in vals {
-        tokens.push(try!(Token::from_lisp(val)));
+        tokens.push(try!(val.unquote()));
     }
 
     lisp.eval_token_vec(tokens)
-}
-
-// Prints all variables current being tracked in all scopes, with exception to the global scope
-// (that holds the stdlib)
-pub fn scope_trace(_: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    let mut index = 1;
-    for env in &lisp.scopes[1..] {
-        println!("{}: {:?}", index, env.map);
-        index += 1;
-    }
-
-    Ok(Value::Nil)
-}
-
-pub fn pow(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
-    let base = try!(f32::from_lisp(vals.remove(0)));
-    let exp = try!(f32::from_lisp(vals.remove(0)));
-
-    Ok(base.powf(exp).to_lisp())
 }
 
 pub fn print(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
@@ -210,19 +189,8 @@ pub fn not(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     Ok((!bool_val).to_lisp())
 }
 
-pub fn list(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+pub fn list(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     Ok(Value::List(vals))
-}
-
-pub fn cons(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
-    let head: Token = try!(Token::from_lisp(vals.remove(0)));
-    let tail: Token = try!(Token::from_lisp(vals.remove(0)));
-
-    let mut tail_tokens = try!(tail.as_list());
-
-    tail_tokens.insert(0, head);
-
-    Ok(Value::Quote(Token::List(tail_tokens)))
 }
 
 math!(add, ops::Add::add);

@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 use std::fmt;
 
 use eval::FuncError;
+use value::Value;
 
 #[derive(Debug, Clone)]
 pub enum ParseError {
@@ -40,8 +41,8 @@ impl FilePos {
     }
 }
 
-pub type TokenizeResult = Result<Vec<Token>, ParseError>; // result of tokenzing a collection of tokens
-pub type ParseResult = Result<Token, ParseError>; // result of tokenizing a single token
+pub type TokenizeResult = Result<Vec<Value>, ParseError>; // result of tokenzing a collection of tokens
+pub type ParseResult = Result<Value, ParseError>; // result of tokenizing a single token
 
 const LIST_OPEN: &'static str = "(";
 const LIST_CLOSE: &'static str = ")";
@@ -49,54 +50,14 @@ const LIST_CLOSE: &'static str = ")";
 const QUOTE_OPEN: &'static str = "{";
 const QUOTE_CLOSE: &'static str = "}";
 
-#[derive(Clone, PartialEq)]
-pub enum Token {
-    Number(f32),
-    StrLit(String),
+pub fn write_list<T>(fmt: &mut fmt::Formatter, list: &Vec<T>, start: &str, end: &str) -> fmt::Result where T: fmt::Debug {
+    write!(fmt, "{}{:?}", start, list[0]);
 
-    Sym(String),
-
-    List(Vec<Token>),
-
-	Quoted(Box<Token>),
-}
-
-impl fmt::Debug for Token {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &Token::Number(n) => write!(fmt, "{}", n),
-            &Token::StrLit(ref lit) => write!(fmt, "{:?}", lit),
-            &Token::Sym(ref sym) => write!(fmt, "{}", sym),
-            &Token::Quoted(ref quote) => write!(fmt, "'{:?}", quote),
-            &Token::List(ref list) => {
-                write!(fmt, "({:?}", list[0]);
-
-                for token in &list[1..] {
-                    write!(fmt, " {:?}", token);
-                }
-
-                write!(fmt, ")")
-            }
-        }
-    }
-}
-
-// This methods return an eval::FuncError to make this easier to use in 
-// foreign functions that manipulate the AST
-impl Token {
-    pub fn as_sym(self) -> Result<String, FuncError> {
-        match self {
-            Token::Sym(sym) => Ok(sym),
-            _ => Err(FuncError::InvalidType),
-        }
+    for token in &list[1..] {
+        write!(fmt, " {:?}", token);
     }
 
-    pub fn as_list(self) -> Result<Vec<Token>, FuncError> {
-        match self {
-            Token::List(list) => Ok(list),
-            _ => Err(FuncError::InvalidType),
-        }
-    }
+    write!(fmt, "{}", end)
 }
 
 fn preprocess(code: &str) -> VecDeque<String> {
@@ -152,32 +113,32 @@ fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
     match &token_str[..] {
         LIST_OPEN => { 
             let tokens = try!(tokenize_list(list, LIST_CLOSE));
-            Ok(Token::List(tokens))
+            Ok(Value::List(tokens))
         },
         QUOTE_OPEN => {
             let tokens = try!(tokenize_list(list, QUOTE_CLOSE));
-            Ok(Token::Quoted(box Token::List(tokens)))
+            Ok(Value::Quote(box Value::List(tokens)))
         },
         LIST_CLOSE | QUOTE_CLOSE => Err(ParseError::InvalidListDelimitter),
 		r"'" => {
 			let token = try!(tokenize(list));
-			Ok(Token::Quoted(box token))
+			Ok(Value::Quote(box token))
 		},
         atom => Ok(tokenize_atom(atom.to_string())),
     }
 }
 
-fn tokenize_atom(atom: String) -> Token {
+fn tokenize_atom(atom: String) -> Value {
     if let Ok(n) = atom.parse() {
-        Token::Number(n)
+        Value::Number(n)
     } else if let Some(lit) = string_lit(&atom[..]) {
-        Token::StrLit(lit) 
+        Value::Str(lit) 
     } else {
-        Token::Sym(atom.to_string())
+        Value::Symbol(atom.to_string())
     }
 }
 
-fn tokenize_list(list: &mut VecDeque<String>, delimit: &str) -> Result<Vec<Token>, ParseError> {
+fn tokenize_list(list: &mut VecDeque<String>, delimit: &str) -> Result<Vec<Value>, ParseError> {
     let mut tokens = Vec::new();
 
     while let Some(item_str) = list.pop_front() {

@@ -1,7 +1,6 @@
 
 use std::rc::Rc;
 
-use parse::Token;
 use eval::{Lisp, FuncError, FuncResult};
 
 pub type RawFunc = fn(Vec<Value>, &mut Lisp) -> FuncResult;
@@ -31,19 +30,44 @@ pub fn func(func: RawFunc, args: Args) -> Func {
 pub enum Value {
     Number(f32),
     Bool(bool),
+
+    Symbol(String),
     Str(String),
 
     // For some reason, fns that take reference arguments are not clonable on their own
     HardFunc(Func), 
     Lambda { 
         args: Vec<String>,
-        body: Vec<Token>,
+        body: Vec<Value>,
     },
 
     List(Vec<Value>),
     Nil,
 
-	Quote(Token),
+	Quote(Box<Value>),
+}
+
+impl Value {
+    pub fn as_sym(self) -> Result<String, FuncError> {
+        match self {
+            Value::Symbol(sym) => Ok(sym),
+            _ => Err(FuncError::InvalidType),
+        }
+    }
+
+    pub fn as_list(self) -> Result<Vec<Value>, FuncError> {
+        match self {
+            Value::List(list) => Ok(list),
+            _ => Err(FuncError::InvalidType),
+        }
+    }
+
+    pub fn unquote(self) -> Result<Value, FuncError> {
+        match self {
+            Value::Quote(val) => Ok(*val),
+            _ => Err(FuncError::InvalidType),
+        }
+    }
 }
 
 pub trait ToLisp {
@@ -92,8 +116,7 @@ macro_rules! lisp_impl {
 lisp_impl!(bool: Value::Bool, 
           f32: Value::Number, 
           String: Value::Str,
-          Func: Value::HardFunc,
-          Token: Value::Quote);
+          Func: Value::HardFunc);
 
 impl ToLisp for () {
     fn to_lisp(self) -> Value { Value::Nil }

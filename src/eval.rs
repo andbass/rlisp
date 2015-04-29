@@ -3,8 +3,8 @@ use std::io::{self, Read};
 use std::cmp;
 use std::fmt;
 
-use parse::{self, Token, ParseError};
-use value::{Value, Func, Args, FromLisp, ToLisp};
+use parse::{self, ParseError};
+use value::{Value, Args, FromLisp, ToLisp};
 use env::Env;
 
 
@@ -60,7 +60,7 @@ impl Lisp {
         self.eval_token_vec(tokens)
     }
 
-    pub fn eval_token_vec(&mut self, mut tokens: Vec<Token>) -> FuncResult {
+    pub fn eval_token_vec(&mut self, mut tokens: Vec<Value>) -> FuncResult {
         let ret_token = match tokens.pop() {
             Some(token) => token,
             None => unreachable!(),
@@ -69,17 +69,15 @@ impl Lisp {
         let ret_val = self.eval_token(ret_token);
 
         for token in tokens {
-            self.eval_token(token);
+            try!(self.eval_token(token));
         }
 
         ret_val
     }
 
-    pub fn eval_token(&mut self, token: Token) -> FuncResult {
+    pub fn eval_token(&mut self, token: Value) -> FuncResult {
         match token {
-            Token::Number(n) => Ok(Value::Number(n)),
-            Token::StrLit(lit) => Ok(Value::Str(lit)),
-            Token::Sym(sym) => {
+            Value::Symbol(sym) => {
                 for env in self.scopes.iter().rev() {
                     if let Some(val) = env.map.get(&sym) {
                         return Ok(val.clone());
@@ -88,7 +86,7 @@ impl Lisp {
 
                 Err(FuncError::UndeclaredSymbol(sym))
             },
-            Token::List(mut tokens) => {
+            Value::List(mut tokens) => {
                 self.sub_scope(); // each list has its own scope
                 let func = try!(self.eval_token(tokens.remove(0)));
 
@@ -149,11 +147,11 @@ impl Lisp {
 
                         result
                     },
-                    _ => Err(FuncError::AttemptToCallNonFunction),
+                    _ => return Err(FuncError::AttemptToCallNonFunction),
                 }
-
             },
-			Token::Quoted(tok) => Ok(Value::Quote(*tok)),
+			Value::Quote(val) => Ok(*val),
+            _ => Ok(token),
         }
     }
 
@@ -178,8 +176,9 @@ impl Lisp {
 impl fmt::Debug for Value {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            &Value::List(ref values) => write!(fmt, "{:?}", values),
+            &Value::List(ref values) => parse::write_list(fmt, values, "[", "]"),
             &Value::Str(ref string) => write!(fmt, "{:?}", string),
+            &Value::Symbol(ref string) => write!(fmt, "{}", string),
             &Value::Number(num) => write!(fmt, "{}", num),
             &Value::HardFunc(ref func) => write!(fmt, "HardFunc({:?})", func.args),
             &Value::Lambda { ref args, ref body }=> write!(fmt, "λ {:?} => {:?}", args, body),
