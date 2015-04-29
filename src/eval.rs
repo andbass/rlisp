@@ -176,7 +176,7 @@ impl Lisp {
 impl fmt::Debug for Value {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            &Value::List(ref values) => parse::write_list(fmt, values, "[", "]"),
+            &Value::List(ref values) => parse::write_list(fmt, values, "(", ")"),
             &Value::Str(ref string) => write!(fmt, "{:?}", string),
             &Value::Symbol(ref string) => write!(fmt, "{}", string),
             &Value::Number(num) => write!(fmt, "{}", num),

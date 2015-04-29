@@ -32,15 +32,7 @@ pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 }
 
 pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
-    let args = try!(vals.remove(0).unquote());
-
-    let mut body = Vec::new();
-    for val in vals {
-        let token = try!(val.unquote());
-        body.push(token); 
-    }
-
-    let args = try!(args.as_list());
+    let args = try!(vals.remove(0).as_list());
 
     let mut arg_strs = Vec::new();
     for arg in args {
@@ -50,7 +42,7 @@ pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
 
     Ok(Value::Lambda {
         args: arg_strs,
-        body: body,
+        body: vals,
     })
 }
 
