@@ -60,8 +60,7 @@ pub fn if_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 }
 
 pub fn eval(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    let unquoted = try!(vals.remove(0).unquote());
-    lisp.eval_token(unquoted)
+    lisp.eval_token_vec(vals)
 }
 
 pub fn seq(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
