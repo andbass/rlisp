@@ -51,6 +51,10 @@ const QUOTE_OPEN: &'static str = "{";
 const QUOTE_CLOSE: &'static str = "}";
 
 pub fn write_list<T>(fmt: &mut fmt::Formatter, list: &Vec<T>, start: &str, end: &str) -> fmt::Result where T: fmt::Debug {
+    if list.len() == 0 {
+        return write!(fmt, "{}{}", start, end);
+    }
+
     write!(fmt, "{}{:?}", start, list[0]);
 
     for token in &list[1..] {
