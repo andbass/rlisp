@@ -3,7 +3,7 @@ use std::process;
 use std::io::{self, Write};
 use std::ops;
 
-use value::{Value, ToLisp, FromLisp};
+use value::{Value, Args, ToLisp, FromLisp};
 use eval::{Lisp, FuncError, FuncResult};
 
 macro_rules! math {
@@ -39,19 +39,39 @@ pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     match sym {
         Value::Symbol(sym) => {
             let val = vals.remove(0);
-            lisp.cur_scope().set(&sym, val);
-            
+            lisp.parent_scope().set(&sym, val);
         },
         Value::List(mut args) => {
             let name = try!(args.remove(0).as_sym());
             let func = try!(make_lambda(args, vals));
 
-            lisp.cur_scope().set(&name, func);
+            lisp.parent_scope().set(&name, func);
         },
         _ => return Err(FuncError::InvalidType),
     }
 
     Ok(Value::Nil)
+}
+
+pub fn let_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let defs = try!(vals.remove(0).as_list());
+
+    for def in defs {
+        let mut def = try!(def.as_list());
+        if def.len() != 2 {
+            return Err(FuncError::InvalidArguments {
+                expected: Args::Fixed(2),
+                got: def.len(),
+            });
+        }
+        
+        let name = try!(def.remove(0).as_sym());
+        let value = def.remove(0);
+
+        lisp.cur_scope().set(&name, value);
+    }
+
+    lisp.eval_token_vec(vals)
 }
 
 // When defining a lambda, the first arg is the list of lambda args

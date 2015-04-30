@@ -29,6 +29,7 @@ impl Env {
         env.set("eval", func(default_env::eval, Args::Fixed(1)));
         env.set("if", func(default_env::if_fn, Args::Fixed(3)));
         env.set("def", func(default_env::define, Args::Atleast(2)));
+        env.set("let", func(default_env::let_fn, Args::Atleast(2)));
         env.set(r"\", func(default_env::lambda, Args::Atleast(2)));
 
         env.set("seq", func(default_env::seq, Args::Atleast(1)));

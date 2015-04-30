@@ -175,6 +175,11 @@ impl Lisp {
     }
 
     pub fn cur_scope(&mut self) -> &mut Env {
+        let index = self.scopes.len() - 1;
+        &mut self.scopes[index]
+    }
+
+    pub fn parent_scope(&mut self) -> &mut Env {
         let index = cmp::max(self.scopes.len() as i32 - 2, 0) as usize;
         &mut self.scopes[index]
     }
