@@ -20,20 +20,7 @@ macro_rules! math {
     }
 }
 
-// Core functions
-pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    let sym = try!(vals.remove(0).as_sym());
-
-    let val = vals.remove(0);
-
-    lisp.cur_scope().set(&sym, val);
-    
-    Ok(Value::Nil)
-}
-
-pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
-    let args = try!(vals.remove(0).as_list());
-
+fn make_lambda(args: Vec<Value>, body: Vec<Value>) -> FuncResult {
     let mut arg_strs = Vec::new();
     for arg in args {
         let sym = try!(arg.as_sym());
@@ -42,15 +29,43 @@ pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
 
     Ok(Value::Lambda {
         args: arg_strs,
-        body: vals,
+        body: body,
     })
+}
+
+// Core functions
+pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let sym = vals.remove(0);
+    match sym {
+        Value::Symbol(sym) => {
+            let val = vals.remove(0);
+            lisp.cur_scope().set(&sym, val);
+            
+        },
+        Value::List(mut args) => {
+            let name = try!(args.remove(0).as_sym());
+            let func = try!(make_lambda(args, vals));
+
+            lisp.cur_scope().set(&name, func);
+        },
+        _ => return Err(FuncError::InvalidType),
+    }
+
+    Ok(Value::Nil)
+}
+
+// When defining a lambda, the first arg is the list of lambda args
+// The rest of the arguments are the 'body' of the lambda
+pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    let args = try!(vals.remove(0).as_list());
+    make_lambda(args, vals)
 }
 
 pub fn if_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let cond: bool = try!(bool::from_lisp(vals.remove(0)));
     
-    let token = try!(vals.remove(0).unquote());
-    let else_token = try!(vals.remove(0).unquote());
+    let token = vals.remove(0);
+    let else_token = vals.remove(0);
 
     lisp.eval_token(if cond { 
         token 
@@ -180,8 +195,22 @@ pub fn not(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     Ok((!bool_val).to_lisp())
 }
 
+// List ops
 pub fn list(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     Ok(Value::List(vals))
+}
+
+pub fn map(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let func = vals.remove(0);
+    let list = try!(vals.remove(0).as_list());
+
+    let mut new_list = Vec::new();
+    for val in list {
+        let s_expr = Value::List(vec!(func.clone(), val));
+        new_list.push(try!(lisp.eval_token(s_expr))); 
+    }
+
+    Ok(Value::List(new_list))
 }
 
 math!(add, ops::Add::add);
