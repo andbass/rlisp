@@ -18,7 +18,10 @@ pub enum FuncError {
     },
     InvalidType,
     UndeclaredSymbol(String),
+
     AttemptToCallNonFunction,
+	AttemptToEvalEmptyList,
+
     IoError(io::Error),
     
     ParsingErr(ParseError),
@@ -87,6 +90,10 @@ impl Lisp {
                 Err(FuncError::UndeclaredSymbol(sym))
             },
             Value::List(mut tokens) => {
+				if tokens.len() == 0 {
+					return Err(FuncError::AttemptToEvalEmptyList);
+				}		
+
                 self.sub_scope(); // each list has its own scope
                 let func = try!(self.eval_token(tokens.remove(0)));
 
