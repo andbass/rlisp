@@ -60,11 +60,15 @@ impl Env {
 
         // List ops
         env.set("list", func(default_env::list, Args::Variant));
-        env.set("map", func(default_env::map, Args::Fixed(2)));
+        env.set("len", func(default_env::len, Args::Fixed(1)));
         env.set("empty?", func(default_env::is_empty, Args::Fixed(1)));
 
         env.set("head", func(default_env::head, Args::Fixed(1)));
         env.set("tail", func(default_env::tail, Args::Fixed(1)));
+
+        env.set("map", func(default_env::map, Args::Fixed(2)));
+        env.set("fold", func(default_env::fold, Args::Fixed(3)));
+        env.set("filter", func(default_env::filter, Args::Fixed(2)));
 
         env
     }

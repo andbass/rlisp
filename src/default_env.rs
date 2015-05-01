@@ -256,6 +256,11 @@ pub fn list(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     Ok(Value::List(vals))
 }
 
+pub fn len(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    let list = try!(vals.remove(0).as_list());
+    Ok(Value::Number(list.len() as f32))
+}
+
 pub fn head(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let mut list = try!(vals.remove(0).as_list());
     Ok(list.remove(0))
@@ -281,6 +286,38 @@ pub fn map(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     for val in list {
         let s_expr = Value::List(vec!(func.clone(), val));
         new_list.push(try!(lisp.eval_token(s_expr))); 
+    }
+
+    Ok(Value::List(new_list))
+}
+
+pub fn fold(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let func = vals.remove(0);
+    let mut acc = vals.remove(0);
+    let list = try!(vals.remove(0).as_list());
+
+    for val in list {
+        let s_expr = Value::List(vec![func.clone(), acc.clone(), val.clone()]);
+        acc = try!(lisp.eval_token(s_expr));
+    }
+
+    Ok(acc)
+}
+
+pub fn filter(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let func = vals.remove(0);
+    let list = try!(vals.remove(0).as_list());
+
+    let mut new_list = Vec::new();
+    for val in list {
+        let s_expr = Value::List(vec![func.clone(), val.clone()]);
+        let result = try!(lisp.eval_token(s_expr));
+
+        let bool_result = try!(bool::from_lisp(result));
+
+        if bool_result {
+            new_list.push(val);
+        }
     }
 
     Ok(Value::List(new_list))
