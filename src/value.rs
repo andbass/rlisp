@@ -32,6 +32,7 @@ pub enum Value {
     Bool(bool),
 
     Symbol(String),
+    VarargSymbol(String),
 
     Str(String),
 

@@ -66,7 +66,7 @@ pub fn let_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
         }
         
         let name = try!(def.remove(0).as_sym());
-        let value = def.remove(0);
+        let value = try!(lisp.eval_token(def.remove(0)));
 
         lisp.cur_scope().set(&name, value);
     }
