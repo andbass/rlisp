@@ -126,10 +126,7 @@ pub fn print(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
 
 pub fn input(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let prompt = if vals.len() == 1 {
-        match vals.remove(0) {
-            Value::Str(prompt) => prompt,
-            _ => return Err(FuncError::InvalidType),
-        }
+        try!(String::from_lisp(vals.remove(0)))
     } else {
         "".to_string()
     };
@@ -152,12 +149,9 @@ pub fn input(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     }
 }
 
-pub fn exit(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+pub fn exit(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let exit_code = if vals.len() == 1 {
-        match vals[0] {
-            Value::Number(code) => code as i32,
-            _ => return Err(FuncError::InvalidType),
-        }
+        try!(f32::from_lisp(vals.remove(0))) as i32
     } else {
         0
     };
