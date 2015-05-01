@@ -74,24 +74,6 @@ pub fn let_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     lisp.eval_token_vec(vals)
 }
 
-// Yes, I know Lisp is meant to be functional, but this is just a test!
-pub fn while_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    let pred = vals.remove(0);
-
-    loop {
-        let pred_val = try!(lisp.eval_token(pred.clone()));
-        let pred_bool = try!(bool::from_lisp(pred_val));
-
-        if !pred_bool {
-            break;
-        }
-
-        try!(lisp.eval_token_vec(vals.clone()));
-    }
-
-    Ok(Value::Nil)
-}
-
 // When defining a lambda, the first arg is the list of lambda args
 // The rest of the arguments are the 'body' of the lambda
 pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
@@ -263,11 +245,25 @@ pub fn len(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
 
 pub fn head(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let mut list = try!(vals.remove(0).as_list());
+
+    if list.len() == 0 {
+        return Err(FuncError::GivenEmptyList);
+    }
+
     Ok(list.remove(0))
 }
 
 pub fn tail(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    if vals.len() == 0 {
+        return Err(FuncError::GivenEmptyList);
+    }
+
     let mut list = try!(vals.remove(0).as_list());
+
+    if list.len() == 0 {
+        return Err(FuncError::GivenEmptyList);
+    }
+
     list.remove(0);
 
     Ok(Value::List(list))
@@ -289,6 +285,22 @@ pub fn map(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     }
 
     Ok(Value::List(new_list))
+}
+
+pub fn cons(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    let new_head = vals.remove(0);
+    let mut list = try!(vals.remove(0).as_list());
+
+    list.insert(0, new_head);
+    Ok(Value::List(list))
+}
+
+pub fn join(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    let mut list = try!(vals.remove(0).as_list());
+    let new_last = vals.remove(0);
+
+    list.push(new_last);
+    Ok(Value::List(list))
 }
 
 pub fn fold(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {

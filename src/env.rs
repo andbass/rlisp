@@ -34,7 +34,6 @@ impl Env {
         env.set(r"\", func(default_env::lambda, Args::Atleast(2)));
 
         env.set("seq", func(default_env::seq, Args::Atleast(1)));
-        env.set("while", func(default_env::while_fn, Args::Atleast(2)));
 
         // Booleans
         env.set("and", func(default_env::and, Args::Variant));
@@ -62,6 +61,9 @@ impl Env {
         env.set("list", func(default_env::list, Args::Variant));
         env.set("len", func(default_env::len, Args::Fixed(1)));
         env.set("empty?", func(default_env::is_empty, Args::Fixed(1)));
+
+        env.set("cons", func(default_env::cons, Args::Fixed(2)));
+        env.set("join", func(default_env::join, Args::Fixed(2)));
 
         env.set("head", func(default_env::head, Args::Fixed(1)));
         env.set("tail", func(default_env::tail, Args::Fixed(1)));

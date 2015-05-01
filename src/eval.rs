@@ -22,6 +22,8 @@ pub enum FuncError {
     AttemptToCallNonFunction,
 	AttemptToEvalEmptyList,
 
+    GivenEmptyList,
+
     IoError(io::Error),
     
     ParsingErr(ParseError),

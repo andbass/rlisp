@@ -32,6 +32,7 @@ pub enum Value {
     Bool(bool),
 
     Symbol(String),
+
     Str(String),
 
     // For some reason, fns that take reference arguments are not clonable on their own
