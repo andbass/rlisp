@@ -69,7 +69,7 @@ fn preprocess(code: &str) -> VecDeque<String> {
     let sym_re = r"[-!?#\w\.]+";
     let num_re = r"\d+\.?\d*e?\d*";
     let list_re = r"[(){}\[\]]";
-    let op_re = r"\+|-|\*|/|\^|&|\||=|\\";
+    let op_re = r"\+|-|\*|/|\^|&|\||=|\\|<|>";
 	let quote_re = r"'";
     
     let regex = format!("{}|{}|{}|{}|{}|{}", string_re, num_re, sym_re, list_re, op_re, quote_re);

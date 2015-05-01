@@ -27,12 +27,14 @@ impl Env {
 
         // Core functions
         env.set("eval", func(default_env::eval, Args::Fixed(1)));
+        env.set("id", func(default_env::id, Args::Fixed(1)));
         env.set("if", func(default_env::if_fn, Args::Fixed(3)));
         env.set("def", func(default_env::define, Args::Atleast(2)));
         env.set("let", func(default_env::let_fn, Args::Atleast(2)));
         env.set(r"\", func(default_env::lambda, Args::Atleast(2)));
 
         env.set("seq", func(default_env::seq, Args::Atleast(1)));
+        env.set("while", func(default_env::while_fn, Args::Atleast(2)));
 
         // Booleans
         env.set("and", func(default_env::and, Args::Variant));
@@ -44,7 +46,10 @@ impl Env {
         env.set("-", func(default_env::sub, Args::Atleast(2)));
         env.set("*", func(default_env::mul, Args::Atleast(2)));
         env.set("/", func(default_env::div, Args::Atleast(2)));
+
         env.set("=", func(default_env::eq, Args::Atleast(2)));
+        env.set(">", func(default_env::greater_than, Args::Fixed(2)));
+        env.set("<", func(default_env::less_than, Args::Fixed(2)));
 
         env.set("print", func(default_env::print, Args::Variant));
         env.set("input", func(default_env::input, Args::Multiple(vec![0, 1])));
@@ -56,6 +61,10 @@ impl Env {
         // List ops
         env.set("list", func(default_env::list, Args::Variant));
         env.set("map", func(default_env::map, Args::Fixed(2)));
+        env.set("empty?", func(default_env::is_empty, Args::Fixed(1)));
+
+        env.set("head", func(default_env::head, Args::Fixed(1)));
+        env.set("tail", func(default_env::tail, Args::Fixed(1)));
 
         env
     }

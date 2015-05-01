@@ -74,6 +74,24 @@ pub fn let_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     lisp.eval_token_vec(vals)
 }
 
+// Yes, I know Lisp is meant to be functional, but this is just a test!
+pub fn while_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let pred = vals.remove(0);
+
+    loop {
+        let pred_val = try!(lisp.eval_token(pred.clone()));
+        let pred_bool = try!(bool::from_lisp(pred_val));
+
+        if !pred_bool {
+            break;
+        }
+
+        try!(lisp.eval_token_vec(vals.clone()));
+    }
+
+    Ok(Value::Nil)
+}
+
 // When defining a lambda, the first arg is the list of lambda args
 // The rest of the arguments are the 'body' of the lambda
 pub fn lambda(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
@@ -96,6 +114,10 @@ pub fn if_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 
 pub fn eval(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     lisp.eval_token_vec(vals)
+}
+
+pub fn id(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    Ok(vals.remove(0))
 }
 
 pub fn seq(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
@@ -186,6 +208,20 @@ pub fn eq(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     Ok(true.to_lisp())
 }
 
+pub fn greater_than(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    let a = try!(f32::from_lisp(vals.remove(0)));
+    let b = try!(f32::from_lisp(vals.remove(0)));
+
+    Ok((a > b).to_lisp())
+}
+
+pub fn less_than(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    let a = try!(f32::from_lisp(vals.remove(0)));
+    let b = try!(f32::from_lisp(vals.remove(0)));
+
+    Ok((a < b).to_lisp())
+}
+
 pub fn and(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     for val in vals {
         let bool_val = try!(bool::from_lisp(val));
@@ -218,6 +254,23 @@ pub fn not(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
 // List ops
 pub fn list(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     Ok(Value::List(vals))
+}
+
+pub fn head(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    let mut list = try!(vals.remove(0).as_list());
+    Ok(list.remove(0))
+}
+
+pub fn tail(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    let mut list = try!(vals.remove(0).as_list());
+    list.remove(0);
+
+    Ok(Value::List(list))
+}
+
+pub fn is_empty(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    let list = try!(vals.remove(0).as_list());
+    Ok((list.len() == 0).to_lisp())
 }
 
 pub fn map(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
