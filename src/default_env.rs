@@ -4,6 +4,7 @@ use std::io::{self, Write};
 use std::ops;
 
 use value::{Value, Args, ToLisp, FromLisp};
+use valtype::Type;
 use eval::{Lisp, FuncError, FuncResult};
 
 macro_rules! math {
@@ -47,7 +48,10 @@ pub fn define(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 
             lisp.parent_scope().set(&name, func);
         },
-        _ => return Err(FuncError::InvalidType),
+        _ => return Err(FuncError::InvalidType {
+            expected: vec![Type::Symbol, Type::List],
+            got: sym,
+        }),
     }
 
     Ok(Value::Nil)
@@ -72,6 +76,11 @@ pub fn let_fn(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     }
 
     lisp.eval_token_vec(vals)
+}
+
+pub fn type_of(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
+    let val = vals.remove(0);
+    Ok(Value::Type(val.typ()))
 }
 
 // When defining a lambda, the first arg is the list of lambda args
@@ -106,7 +115,7 @@ pub fn seq(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let mut tokens = Vec::new();
 
     for val in vals {
-        tokens.push(try!(val.unquote()));
+        tokens.push(val);
     }
 
     lisp.eval_token_vec(tokens)
@@ -286,19 +295,6 @@ pub fn is_empty(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     Ok((list.len() == 0).to_lisp())
 }
 
-pub fn map(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
-    let func = vals.remove(0);
-    let list = try!(vals.remove(0).as_list());
-
-    let mut new_list = Vec::new();
-    for val in list {
-        let s_expr = Value::List(vec!(func.clone(), val));
-        new_list.push(try!(lisp.eval_token(s_expr))); 
-    }
-
-    Ok(Value::List(new_list))
-}
-
 pub fn cons(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let new_head = vals.remove(0);
     let mut list = try!(vals.remove(0).as_list());
@@ -314,6 +310,20 @@ pub fn join(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     list.push(new_last);
     Ok(Value::List(list))
 }
+
+pub fn map(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
+    let func = vals.remove(0);
+    let list = try!(vals.remove(0).as_list());
+
+    let mut new_list = Vec::new();
+    for val in list {
+        let s_expr = Value::List(vec!(func.clone(), val));
+        new_list.push(try!(lisp.eval_token(s_expr))); 
+    }
+
+    Ok(Value::List(new_list))
+}
+
 
 pub fn fold(mut vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
     let func = vals.remove(0);

@@ -2,6 +2,7 @@
 use std::collections::HashMap;
 
 use value::{func, Value, Args, ToLisp};
+use valtype::Type;
 use default_env;
 
 #[derive(Debug)]
@@ -24,6 +25,18 @@ impl Env {
         env.set("false", false);
 
         env.set("nil", ());
+
+        // Types
+        env.set("Number", Type::Number);
+        env.set("Bool", Type::Bool);
+        env.set("String", Type::Str);
+        env.set("Symbol", Type::Symbol);
+        env.set("List", Type::List);
+        env.set("Nil", Type::Nil);
+        env.set("ForeignFunc", Type::HardFunc);
+        env.set("Lambda", Type::Lambda);
+
+        env.set("type", func(default_env::type_of, Args::Fixed(1)));
 
         // Core functions
         env.set("eval", func(default_env::eval, Args::Fixed(1)));
@@ -70,7 +83,7 @@ impl Env {
         env.set("tail", func(default_env::tail, Args::Fixed(1)));
 
         env.set("map", func(default_env::map, Args::Fixed(2)));
-        env.set("fold", func(default_env::fold, Args::Fixed(3)));
+        env.set("fold", func(default_env::fold, Args::Multiple(vec![2, 3])));
         env.set("filter", func(default_env::filter, Args::Fixed(2)));
 
         env

@@ -2,6 +2,7 @@
 use std::rc::Rc;
 
 use eval::{Lisp, FuncError, FuncResult};
+use valtype::Type;
 
 pub type RawFunc = fn(Vec<Value>, &mut Lisp) -> FuncResult;
 
@@ -32,7 +33,6 @@ pub enum Value {
     Bool(bool),
 
     Symbol(String),
-    VarargSymbol(String),
 
     Str(String),
 
@@ -47,27 +47,43 @@ pub enum Value {
     Nil,
 
 	Quote(Box<Value>),
+    Type(Type),
 }
 
 impl Value {
     pub fn as_sym(self) -> Result<String, FuncError> {
         match self {
             Value::Symbol(sym) => Ok(sym),
-            _ => Err(FuncError::InvalidType),
+            _ => Err(FuncError::InvalidType {
+                expected: vec![Type::Symbol],
+                got: self,
+            }),
         }
     }
 
     pub fn as_list(self) -> Result<Vec<Value>, FuncError> {
         match self {
             Value::List(list) => Ok(list),
-            _ => Err(FuncError::InvalidType),
+            _ => Err(FuncError::InvalidType {
+                expected: vec![Type::List],
+                got: self,
+            }),
         }
     }
 
-    pub fn unquote(self) -> Result<Value, FuncError> {
+    pub fn typ(&self) -> Type {
         match self {
-            Value::Quote(val) => Ok(*val),
-            _ => Err(FuncError::InvalidType),
+            &Value::Number(_) => Type::Number,
+            &Value::Bool(_) => Type::Bool,
+            &Value::Symbol(_) => Type::Symbol,
+            &Value::Str(_) => Type::Str,
+            &Value::HardFunc(_) => Type::HardFunc,
+            &Value::Lambda { .. } => Type::Lambda,
+            &Value::List(_) => Type::List,
+            &Value::Nil => Type::Nil,
+            &Value::Quote(ref val) => Type::Quote(box val.typ()),
+            &Value::Type(_) => Type::Type,
+            
         }
     }
 }
@@ -95,30 +111,34 @@ impl PartialEq for Func {
 }
 
 macro_rules! lisp_impl {
-    ($( $t:ty: $path:path ),+) => {
+    ($( $t:ty: $ident:ident ),+) => {
         $(
             impl FromLisp for $t {
                 fn from_lisp(val: Value) -> Result<$t, FuncError> {
                     match val {
-                        $path(val) => Ok(val),
-                        _ => Err(FuncError::InvalidType),
+                        Value::$ident(val) => Ok(val),
+                        _ => Err(FuncError::InvalidType {
+                            expected: vec![Type::$ident],
+                            got: val
+                        }),
                     }
                 }
             }
 
             impl ToLisp for $t {
                 fn to_lisp(self) -> Value {
-                    $path(self)
+                    Value::$ident(self)
                 }
             }
         )*
     }
 }
 
-lisp_impl!(bool: Value::Bool, 
-          f32: Value::Number, 
-          String: Value::Str,
-          Func: Value::HardFunc);
+lisp_impl!(bool: Bool, 
+          f32: Number, 
+          String: Str,
+          Func: HardFunc,
+          Type: Type);
 
 impl ToLisp for () {
     fn to_lisp(self) -> Value { Value::Nil }
@@ -128,7 +148,10 @@ impl FromLisp for () {
     fn from_lisp(val: Value) -> Result<(), FuncError> {
         match val {
             Value::Nil => Ok(()),
-            _ => Err(FuncError::InvalidType),
+            _ => Err(FuncError::InvalidType {
+                expected: vec![Type::Nil],
+                got: val,
+            }),
         }
     }
 }

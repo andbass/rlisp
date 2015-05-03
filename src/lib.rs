@@ -16,6 +16,7 @@ macro_rules! invalid_args {
 pub mod parse;
 pub mod eval;
 pub mod value;
+pub mod valtype;
 pub mod env;
 mod default_env;
 

@@ -5,8 +5,8 @@ use std::fmt;
 
 use parse::{self, ParseError};
 use value::{Value, Args, FromLisp, ToLisp};
+use valtype::Type;
 use env::Env;
-
 
 pub type FuncResult = Result<Value, FuncError>;
 
@@ -16,7 +16,10 @@ pub enum FuncError {
         expected: Args,
         got: usize,
     },
-    InvalidType,
+    InvalidType {
+        expected: Vec<Type>,
+        got: Value,
+    },
     UndeclaredSymbol(String),
 
     AttemptToCallNonFunction,
@@ -96,8 +99,8 @@ impl Lisp {
 					return Err(FuncError::AttemptToEvalEmptyList);
 				}		
 
-                self.sub_scope(); // each list has its own scope
                 let func = try!(self.eval_token(tokens.remove(0)));
+                self.sub_scope(); // each list has its own scope
 
                 match func {
                     Value::HardFunc(hard_func) => {
@@ -193,13 +196,13 @@ impl fmt::Debug for Value {
             &Value::List(ref values) => parse::write_list(fmt, values, "(", ")"),
             &Value::Str(ref string) => write!(fmt, "{:?}", string),
             &Value::Symbol(ref string) => write!(fmt, "{}", string),
-            &Value::VarargSymbol(ref string) => write!(fmt, "{}...", string),
             &Value::Number(num) => write!(fmt, "{}", num),
             &Value::HardFunc(ref func) => write!(fmt, "HardFunc({:?})", func.args),
             &Value::Lambda { ref args, ref body }=> write!(fmt, "λ {:?} => {:?}", args, body),
             &Value::Nil => write!(fmt, "nil"),
             &Value::Bool(val) => write!(fmt, "{}", val),
 			&Value::Quote(ref tok) => write!(fmt, "'{:?}", tok),
+            &Value::Type(ref typ) => write!(fmt, "{:?}", typ),
         }
     }
 }
