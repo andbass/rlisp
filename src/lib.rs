@@ -18,6 +18,8 @@ pub mod eval;
 pub mod value;
 pub mod valtype;
 pub mod env;
+
+mod error_msg;
 mod default_env;
 
 pub use eval::{Lisp, FuncResult, FuncError};

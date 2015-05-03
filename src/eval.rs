@@ -10,7 +10,6 @@ use env::Env;
 
 pub type FuncResult = Result<Value, FuncError>;
 
-#[derive(Debug)]
 pub enum FuncError {
     InvalidArguments {
         expected: Args,
@@ -22,7 +21,7 @@ pub enum FuncError {
     },
     UndeclaredSymbol(String),
 
-    AttemptToCallNonFunction,
+    AttemptToCallNonFunction(Value),
 	AttemptToEvalEmptyList,
 
     GivenEmptyList,
@@ -159,7 +158,7 @@ impl Lisp {
 
                         result
                     },
-                    _ => return Err(FuncError::AttemptToCallNonFunction),
+                    _ => return Err(FuncError::AttemptToCallNonFunction(func)),
                 }
             },
 			Value::Quote(val) => Ok(*val),
@@ -193,7 +192,7 @@ impl Lisp {
 impl fmt::Debug for Value {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            &Value::List(ref values) => parse::write_list(fmt, values, "(", ")"),
+            &Value::List(ref values) => parse::write_list(fmt, values, "(", " ", ")"),
             &Value::String(ref string) => write!(fmt, "{:?}", string),
             &Value::Symbol(ref string) => write!(fmt, "{}", string),
             &Value::Number(num) => write!(fmt, "{}", num),
