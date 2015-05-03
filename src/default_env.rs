@@ -124,7 +124,7 @@ pub fn seq(vals: Vec<Value>, lisp: &mut Lisp) -> FuncResult {
 pub fn print(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     for val in vals {
         match val {
-            Value::Str(string) => print!("{}", string),
+            Value::String(string) => print!("{}", string),
             _ => print!("{:?}", val),
         }
     }
@@ -173,7 +173,7 @@ pub fn str_fn(vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
 
     for val in vals {
         let string = match val {
-            Value::Str(str) => str,
+            Value::String(str) => str,
             other => format!("{:?}", other),
         };
 

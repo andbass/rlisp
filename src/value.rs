@@ -34,7 +34,7 @@ pub enum Value {
 
     Symbol(String),
 
-    Str(String),
+    String(String),
 
     // For some reason, fns that take reference arguments are not clonable on their own
     HardFunc(Func), 
@@ -76,7 +76,7 @@ impl Value {
             &Value::Number(_) => Type::Number,
             &Value::Bool(_) => Type::Bool,
             &Value::Symbol(_) => Type::Symbol,
-            &Value::Str(_) => Type::Str,
+            &Value::String(_) => Type::String,
             &Value::HardFunc(_) => Type::HardFunc,
             &Value::Lambda { .. } => Type::Lambda,
             &Value::List(_) => Type::List,
@@ -136,7 +136,7 @@ macro_rules! lisp_impl {
 
 lisp_impl!(bool: Bool, 
           f32: Number, 
-          String: Str,
+          String: String,
           Func: HardFunc,
           Type: Type);
 

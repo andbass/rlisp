@@ -5,7 +5,7 @@ pub enum Type {
     Bool,
     
     Symbol,
-    Str,
+    String,
 
     List,
 

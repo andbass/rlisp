@@ -29,7 +29,7 @@ impl Env {
         // Types
         env.set("Number", Type::Number);
         env.set("Bool", Type::Bool);
-        env.set("String", Type::Str);
+        env.set("String", Type::String);
         env.set("Symbol", Type::Symbol);
         env.set("List", Type::List);
         env.set("Nil", Type::Nil);

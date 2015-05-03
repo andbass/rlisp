@@ -136,7 +136,7 @@ fn tokenize_atom(atom: String) -> Value {
     if let Ok(n) = atom.parse() {
         Value::Number(n)
     } else if let Some(lit) = string_lit(&atom[..]) {
-        Value::Str(lit) 
+        Value::String(lit) 
     } else {
         Value::Symbol(atom.to_string())
     }
