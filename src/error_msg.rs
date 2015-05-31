@@ -16,7 +16,7 @@ impl fmt::Debug for FuncError {
                 write!(fmt, "but got a {:?} with a value of {:?}", got.typ(), got)
             },
             &FuncError::UndeclaredSymbol(ref sym) => {
-                write!(fmt, "{} does not refer to a valid value stored in any currently accessible scope", sym)
+                write!(fmt, "Undefined symbol {}", sym)
             },
             &FuncError::AttemptToCallNonFunction(ref val) => {
                 write!(fmt, "{:?} is not a callable function", val)

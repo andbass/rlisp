@@ -97,8 +97,9 @@ impl Lisp {
 				if tokens.len() == 0 {
 					return Err(FuncError::AttemptToEvalEmptyList);
 				}		
-
-                let func = try!(self.eval_token(tokens.remove(0)));
+            
+                let val = tokens.remove(0);
+                let func = try!(self.eval_token(val.clone()));
                 self.sub_scope(); // each list has its own scope
 
                 match func {
@@ -158,7 +159,7 @@ impl Lisp {
 
                         result
                     },
-                    _ => return Err(FuncError::AttemptToCallNonFunction(func)),
+                    _ => return Err(FuncError::AttemptToCallNonFunction(val)),
                 }
             },
 			Value::Quote(val) => Ok(*val),
