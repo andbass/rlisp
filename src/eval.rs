@@ -73,13 +73,11 @@ impl Lisp {
             None => unreachable!(),
         };
 
-        let ret_val = self.eval_token(ret_token);
-
         for token in tokens {
             try!(self.eval_token(token));
         }
 
-        ret_val
+        self.eval_token(ret_token)
     }
 
     pub fn eval_token(&mut self, token: Value) -> FuncResult {
