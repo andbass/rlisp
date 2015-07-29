@@ -8,7 +8,7 @@ Everything, even pieces of syntax like `def`(short for `define`) and `let`, are 
 Therefore, anything that shouldn't be evaluated while being passed as an argument has to be quoted.
 
 For instance, here's how you define a variable:
-```
+```lisp
 (def 'var 2)
 ```
 You have to quote the symbol because `def` isn't a special syntax definition, its just a regular old function.
@@ -18,7 +18,7 @@ Its kind of a pure way of doing things, it's very clear how things will be evalu
 Mainly though, I did it this way because it's easier and I'm lazy.
 
 Here's a function definition (it squares a number):
-```
+```lisp
 (def {square x}
   {* x x})
 ```
