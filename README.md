@@ -11,10 +11,10 @@ For instance, here's how you define a variable:
 ```lisp
 (def 'var 2)
 ```
-You have to quote the symbol because `def` isn't a special syntax definition, its just a regular old function.
+You have to quote the symbol because `def` isn't a special syntax definition, it's just a regular old function.
 Without quoting the symbol, rlisp would try to evaluate it and fail to resolve it (since it hasn't been defined yet, we're defining it now!).
 
-Its kind of a pure way of doing things, it's very clear how things will be evaluated when your code runs (everything is a regular function, even core pieces of syntax like `def` and `if`),
+It's kind of a pure way of doing things, it's very clear how things will be evaluated when your code runs (everything is a regular function, even core pieces of syntax like `def` and `if`),
 Mainly though, I did it this way because it's easier and I'm lazy.
 
 Here's a function definition (it squares a number):
@@ -23,14 +23,14 @@ Here's a function definition (it squares a number):
   {* x x})
 ```
 
-Those curly braces represent a quoted list, its the same thing as writing `'(* x x)`.  Again, there's no macros or syntax definitions like in a lisp like Scheme.  
+Those curly braces represent a quoted list, its the same thing as writing `'(* x x)`.  Again, there's no macros or syntax definitions such as in a lisp like Scheme.  
 It's just functions all the way down.
 
 There's no documentation for anything in the standard lib, so you'll need to peek around `env.rs` to see all the avaliable built functions and variables.
 Their definitions are actually stored in `stdlib.rs`, but they're inserted into the lisp environment in `env.rs`
 
 Here's one more function definition, this one is a bit more complex:
-```
+```lisp
 (def {is-the-answer? ans}
   {if (= ans 42)
     {seq
@@ -41,4 +41,4 @@ Here's one more function definition, this one is a bit more complex:
   })
 ```
 
-Its very simple right now.  I have some ideas of things to do, like adding OOP of some kind might be fun.
+It's very simple right now.  I have some ideas of things to do, adding OOP of some kind might be fun.
