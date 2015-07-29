@@ -42,3 +42,11 @@ Here's one more function definition, this one is a bit more complex:
 ```
 
 It's very simple right now.  I have some ideas of things to do, adding OOP of some kind might be fun.
+
+One more thing, you can make lambdas / closures with the `\` operator, like this:
+```
+(map (\{x} {* x x}) (range 0 10))
+```
+
+The first argument is the list of arguments, everything after is the body of the lambda.
+Multiple expressions are supported in lambdas, like with `seq`, the last one is returned.
