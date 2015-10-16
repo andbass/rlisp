@@ -22,31 +22,3 @@ Here's a function definition (it squares a number):
 (def {square x}
   {* x x})
 ```
-
-Those curly braces represent a quoted list, its the same thing as writing `'(* x x)`.  Again, there's no macros or syntax definitions such as in a lisp like Scheme.  
-It's just functions all the way down.
-
-There's no documentation for anything in the standard lib, so you'll need to peek around `env.rs` to see all the avaliable built functions and variables.
-Their definitions are actually stored in `stdlib.rs`, but they're inserted into the lisp environment in `env.rs`
-
-Here's one more function definition, this one is a bit more complex:
-```lisp
-(def {is-the-answer? ans}
-  {if (= ans 42)
-    {seq
-      {print "HOORAY!"}
-      {print "Seq performs all given expressions in order, it returns the last one"}
-    }
-    {print "NO"}
-  })
-```
-
-It's very simple right now.  I have some ideas of things to do, adding OOP of some kind might be fun.
-
-One more thing, you can make lambdas / closures with the `\` operator, like this:
-```
-(map (\{x} {* x x}) (range 0 10))
-```
-
-The first argument is the list of arguments, everything after is the body of the lambda.
-Multiple expressions are supported in lambdas, like with `seq`, the last one is returned.
