@@ -1,6 +1,6 @@
-
 extern crate rlisp;
 extern crate toml;
+extern crate readline;
 
 use rlisp::Lisp;
 use rlisp::eval::{FuncResult, FuncError};
@@ -11,7 +11,7 @@ use std::io::{self, Read, Write};
 fn main() {
     let mut lisp = Lisp::new();
     println!("rlisp {}", get_version());
-    
+
     loop {
         let input = read(">>> ");
         let result = eval(input, &mut lisp);
@@ -37,7 +37,7 @@ fn read(prompt: &str) -> String {
 
 fn eval(mut input: String, lisp: &mut Lisp) -> FuncResult {
     let val = lisp.eval_raw(&input);
-    
+
     match val {
         Ok(val) => Ok(val),
         Err(err) => match err {

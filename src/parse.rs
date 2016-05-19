@@ -1,4 +1,3 @@
-
 use regex::Regex;
 
 use std::collections::VecDeque;
@@ -23,7 +22,7 @@ pub struct FilePos {
 impl FilePos {
     fn from_offset(text: &str, mut offset: usize) -> FilePos {
         let mut line_no = 1;
-       
+
         for (cur_offset, ch) in text.bytes().enumerate() {
             if cur_offset >= offset {
                 break;
@@ -41,7 +40,6 @@ impl FilePos {
     }
 }
 
-pub type TokenizeResult = Result<Vec<Value>, ParseError>; // result of tokenzing a collection of tokens
 pub type ParseResult = Result<Value, ParseError>; // result of tokenizing a single token
 
 const LIST_OPEN: &'static str = "(";
@@ -64,14 +62,14 @@ pub fn write_list<T>(fmt: &mut fmt::Formatter, list: &Vec<T>, start: &str, sep: 
     write!(fmt, "{}", end)
 }
 
-fn preprocess(code: &str) -> VecDeque<String> {
+fn tokenize(code: &str) -> VecDeque<String> {
     let string_re = r#""[^"]*""#;
     let sym_re = r"[-!?#\w\.]+";
     let num_re = r"\d+\.?\d*e?\d*";
     let list_re = r"[(){}\[\]]";
     let op_re = r"\+|-|\*|/|\^|&|\||=|\\|<|>";
-	let quote_re = r"'";
-    
+    let quote_re = r"'";
+
     let regex = format!("{}|{}|{}|{}|{}|{}", string_re, num_re, sym_re, list_re, op_re, quote_re);
 
     let re = match Regex::new(&regex) {
@@ -95,54 +93,54 @@ fn preprocess(code: &str) -> VecDeque<String> {
     return token_strs;
 }
 
-pub fn tokenize_str(code: &str) -> TokenizeResult {
-    let mut tokens = Vec::new();
-    
-    let mut seperated_code = preprocess(code);
+pub fn parse_str(code: &str) -> Result<Vec<Value>, ParseError> {
+    let mut values = Vec::new();
 
-    while seperated_code.len() > 0 {
-        tokens.push(try!(tokenize(&mut seperated_code)));
+    let mut tokens = tokenize(code);
+
+    while tokens.len() > 0 {
+        values.push(try!(parse(&mut tokens)));
     }
 
-    Ok(tokens)
+    Ok(values)
 }
 
 /// Extracts a single token out of a list of strings, which may contain multiple tokens
-fn tokenize(list: &mut VecDeque<String>) -> ParseResult {
-    let token_str = match list.pop_front() {
+fn parse(list: &mut VecDeque<String>) -> ParseResult {
+    let head = match list.pop_front() {
         Some(string) => string,
         None => return Err(ParseError::UnreadableSourceCode),
     };
 
-    match &token_str[..] {
-        LIST_OPEN => { 
-            let tokens = try!(tokenize_list(list, LIST_CLOSE));
+    match &head[..] {
+        LIST_OPEN => {
+            let tokens = try!(parse_list(list, LIST_CLOSE));
             Ok(Value::List(tokens))
         },
         QUOTE_OPEN => {
-            let tokens = try!(tokenize_list(list, QUOTE_CLOSE));
+            let tokens = try!(parse_list(list, QUOTE_CLOSE));
             Ok(Value::Quote(box Value::List(tokens)))
         },
         LIST_CLOSE | QUOTE_CLOSE => Err(ParseError::InvalidListDelimitter),
-		r"'" => {
-			let token = try!(tokenize(list));
-			Ok(Value::Quote(box token))
-		},
-        atom => Ok(tokenize_atom(atom.to_string())),
+        r"'" => {
+            let token = try!(parse(list));
+            Ok(Value::Quote(box token))
+        },
+        atom => Ok(parse_atom(atom.to_string())),
     }
 }
 
-fn tokenize_atom(atom: String) -> Value {
+fn parse_atom(atom: String) -> Value {
     if let Ok(n) = atom.parse() {
         Value::Number(n)
     } else if let Some(lit) = string_lit(&atom[..]) {
-        Value::String(lit) 
+        Value::String(lit)
     } else {
         Value::Symbol(atom.to_string())
     }
 }
 
-fn tokenize_list(list: &mut VecDeque<String>, delimit: &str) -> Result<Vec<Value>, ParseError> {
+fn parse_list(list: &mut VecDeque<String>, delimit: &str) -> Result<Vec<Value>, ParseError> {
     let mut tokens = Vec::new();
 
     while let Some(item_str) = list.pop_front() {
@@ -152,7 +150,7 @@ fn tokenize_list(list: &mut VecDeque<String>, delimit: &str) -> Result<Vec<Value
 
         // If not the end of the list, push the item back and continue to process the list
         list.push_front(item_str);
-        tokens.push(try!(tokenize(list)));
+        tokens.push(try!(parse(list)));
     }
 
     Err(ParseError::UnclosedList)

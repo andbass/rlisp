@@ -1,4 +1,3 @@
-
 use std::io::{self, Read};
 use std::cmp;
 use std::fmt;
@@ -22,12 +21,12 @@ pub enum FuncError {
     UndeclaredSymbol(String),
 
     AttemptToCallNonFunction(Value),
-	AttemptToEvalEmptyList,
+  AttemptToEvalEmptyList,
 
     GivenEmptyList,
 
     IoError(io::Error),
-    
+
     ParsingErr(ParseError),
 }
 
@@ -38,7 +37,7 @@ pub struct Lisp {
 impl Lisp {
     pub fn new() -> Lisp {
         Lisp {
-            scopes: vec![Env::std_lib()], 
+            scopes: vec![Env::std_lib()],
         }
     }
 
@@ -59,7 +58,7 @@ impl Lisp {
     }
 
     pub fn eval_raw(&mut self, code: &str) -> FuncResult {
-        let tokens = match parse::tokenize_str(code) {
+        let tokens = match parse::parse_str(code) {
             Ok(tok) => tok,
             Err(err) => return Err(FuncError::ParsingErr(err)),
         };
@@ -92,10 +91,10 @@ impl Lisp {
                 Err(FuncError::UndeclaredSymbol(sym))
             },
             Value::List(mut tokens) => {
-				if tokens.len() == 0 {
-					return Err(FuncError::AttemptToEvalEmptyList);
-				}		
-            
+        if tokens.len() == 0 {
+          return Err(FuncError::AttemptToEvalEmptyList);
+        }
+
                 let val = tokens.remove(0);
                 let func = try!(self.eval_token(val.clone()));
                 self.sub_scope(); // each list has its own scope
@@ -160,7 +159,7 @@ impl Lisp {
                     _ => return Err(FuncError::AttemptToCallNonFunction(val)),
                 }
             },
-			Value::Quote(val) => Ok(*val),
+      Value::Quote(val) => Ok(*val),
             _ => Ok(token),
         }
     }
@@ -199,7 +198,7 @@ impl fmt::Debug for Value {
             &Value::Lambda { ref args, ref body }=> write!(fmt, "λ {:?} => {:?}", args, body),
             &Value::Nil => write!(fmt, "nil"),
             &Value::Bool(val) => write!(fmt, "{}", val),
-			&Value::Quote(ref tok) => write!(fmt, "'{:?}", tok),
+      &Value::Quote(ref tok) => write!(fmt, "'{:?}", tok),
             &Value::Type(ref typ) => write!(fmt, "{:?}", typ),
         }
     }

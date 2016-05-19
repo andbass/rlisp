@@ -1,5 +1,5 @@
-
 use std::rc::Rc;
+use std::marker::Sized;
 
 use eval::{Lisp, FuncError, FuncResult};
 use valtype::Type;
@@ -37,8 +37,8 @@ pub enum Value {
     String(String),
 
     // For some reason, fns that take reference arguments are not clonable on their own
-    HardFunc(Func), 
-    Lambda { 
+    HardFunc(Func),
+    Lambda {
         args: Vec<String>,
         body: Vec<Value>,
     },
@@ -46,7 +46,7 @@ pub enum Value {
     List(Vec<Value>),
     Nil,
 
-	Quote(Box<Value>),
+  Quote(Box<Value>),
     Type(Type),
 }
 
@@ -83,7 +83,6 @@ impl Value {
             &Value::Nil => Type::Nil,
             &Value::Quote(ref val) => Type::Quote(box val.typ()),
             &Value::Type(_) => Type::Type,
-            
         }
     }
 }
@@ -92,7 +91,7 @@ pub trait ToLisp {
     fn to_lisp(self) -> Value;
 }
 
-pub trait FromLisp {
+pub trait FromLisp where Self: Sized {
     fn from_lisp(Value) -> Result<Self, FuncError>;
 }
 
@@ -105,7 +104,7 @@ impl PartialEq for Func {
 
             return f1 == f2;
         }
-         
+
         return false;
     }
 }
@@ -134,8 +133,8 @@ macro_rules! lisp_impl {
     }
 }
 
-lisp_impl!(bool: Bool, 
-          f32: Number, 
+lisp_impl!(bool: Bool,
+          f32: Number,
           String: String,
           Func: HardFunc,
           Type: Type);

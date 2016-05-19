@@ -8,3 +8,4 @@ regex = "*"
 
 [dev_dependencies]
 toml = "*"
+readline = "*"
