@@ -84,8 +84,13 @@ fn tokenize(code: &str) -> VecDeque<String> {
     let mut token_strs = VecDeque::new();
 
     for cap in re.captures_iter(&spaced_code) {
-        let (offset, _) = cap.pos(0).unwrap_or((0, 0));
-        let match_str = cap.at(0).unwrap_or("");
+        let (offset, _) = cap.get(0)
+            .map(|text| (text.start(), text.end()))
+            .unwrap_or((0, 0));
+
+        let match_str = cap.get(0)
+            .map(|text| text.as_str())
+            .unwrap_or("");
 
         token_strs.push_back(match_str.to_string());
     }

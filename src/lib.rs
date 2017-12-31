@@ -1,5 +1,5 @@
 
-#![feature(box_syntax, step_by)]
+#![feature(box_syntax, iterator_step_by)]
 
 extern crate regex;
 

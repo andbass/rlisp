@@ -7,5 +7,4 @@ authors = ["Andrew Bass <andybass009@gmail.com>"]
 regex = "*"
 
 [dev_dependencies]
-toml = "*"
 readline = "*"

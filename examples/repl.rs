@@ -1,5 +1,4 @@
 extern crate rlisp;
-extern crate toml;
 extern crate readline;
 
 use rlisp::Lisp;
@@ -10,7 +9,6 @@ use std::io::{self, Read, Write};
 
 fn main() {
     let mut lisp = Lisp::new();
-    println!("rlisp {}", get_version());
 
     loop {
         let input = read(">>> ");
@@ -48,19 +46,4 @@ fn eval(mut input: String, lisp: &mut Lisp) -> FuncResult {
             _ => Err(err),
         }
     }
-}
-
-fn get_version() -> String {
-    use std::fs::File;
-
-    let mut cargo = File::open("Cargo.toml").unwrap();
-
-    let mut cargo_contents = String::new();
-    cargo.read_to_string(&mut cargo_contents).unwrap();
-
-    let toml: toml::Value = (&cargo_contents[..]).parse().unwrap();
-
-    toml.lookup("package.version").unwrap()
-        .as_str().unwrap()
-        .to_string()
 }

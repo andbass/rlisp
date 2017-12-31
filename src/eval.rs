@@ -91,9 +91,9 @@ impl Lisp {
                 Err(FuncError::UndeclaredSymbol(sym))
             },
             Value::List(mut tokens) => {
-        if tokens.len() == 0 {
-          return Err(FuncError::AttemptToEvalEmptyList);
-        }
+                if tokens.len() == 0 {
+                  return Err(FuncError::AttemptToEvalEmptyList);
+                }
 
                 let val = tokens.remove(0);
                 let func = try!(self.eval_token(val.clone()));
@@ -159,7 +159,7 @@ impl Lisp {
                     _ => return Err(FuncError::AttemptToCallNonFunction(val)),
                 }
             },
-      Value::Quote(val) => Ok(*val),
+            Value::Quote(val) => Ok(*val),
             _ => Ok(token),
         }
     }
@@ -198,7 +198,7 @@ impl fmt::Debug for Value {
             &Value::Lambda { ref args, ref body }=> write!(fmt, "λ {:?} => {:?}", args, body),
             &Value::Nil => write!(fmt, "nil"),
             &Value::Bool(val) => write!(fmt, "{}", val),
-      &Value::Quote(ref tok) => write!(fmt, "'{:?}", tok),
+            &Value::Quote(ref tok) => write!(fmt, "'{:?}", tok),
             &Value::Type(ref typ) => write!(fmt, "{:?}", typ),
         }
     }

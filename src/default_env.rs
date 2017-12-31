@@ -252,7 +252,7 @@ pub fn range(mut vals: Vec<Value>, _: &mut Lisp) -> FuncResult {
     let end = try!(f32::from_lisp(vals.remove(0))) as i32;
     
     let list = (initial..end)
-        .step_by(step)
+        .step_by(step as usize)
         .map(|n| (n as f32).to_lisp())
         .collect();
 
