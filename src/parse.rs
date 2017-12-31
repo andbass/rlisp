@@ -11,6 +11,7 @@ pub enum ParseError {
     UnclosedList,
     InvalidListDelimitter,
     UnreadableSourceCode,
+    InvalidHexLiteral,
 }
 
 #[derive(Debug, Clone)]
@@ -131,17 +132,20 @@ fn parse(list: &mut VecDeque<String>) -> ParseResult {
             let token = try!(parse(list));
             Ok(Value::Quote(box token))
         },
-        atom => Ok(parse_atom(atom.to_string())),
+        atom => parse_atom(atom.to_string()),
     }
 }
 
-fn parse_atom(atom: String) -> Value {
-    if let Ok(n) = atom.parse() {
-        Value::Number(n)
+fn parse_atom(atom: String) -> ParseResult {
+    if atom.starts_with("#") {
+        let value = usize::from_str_radix(&atom[1..], 16).map_err(|_| ParseError::InvalidHexLiteral)?;
+        Ok(Value::Number(value as f32))
+    } else if let Ok(n) = atom.parse() {
+        Ok(Value::Number(n))
     } else if let Some(lit) = string_lit(&atom[..]) {
-        Value::String(lit)
+        Ok(Value::String(lit))
     } else {
-        Value::Symbol(atom.to_string())
+        Ok(Value::Symbol(atom.to_string()))
     }
 }
 
