@@ -41,7 +41,7 @@ impl Lisp {
         }
     }
 
-    pub fn new_no_stdlib() -> Lisp {
+    pub fn new_empty_env() -> Lisp {
         Lisp {
             scopes: vec![Env::new()],
         }
