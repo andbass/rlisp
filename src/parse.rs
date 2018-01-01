@@ -70,7 +70,7 @@ fn remove_comments(code: &str) -> String {
 
 fn tokenize(code: &str) -> VecDeque<String> {
     let string_re = r#""[^"]*""#;
-    let sym_re = r"[-!?#\w\.]+";
+    let sym_re = r"[-!:?#\w\.]+";
     let num_re = r"\d+\.?\d*e?\d*";
     let list_re = r"[(){}\[\]]";
     let op_re = r"\+|-|\*|/|\^|&|\||=|\\|<|>";
