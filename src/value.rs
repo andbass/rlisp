@@ -1,5 +1,7 @@
 use std::rc::Rc;
 use std::marker::Sized;
+use std::any::Any;
+use std::fmt::Debug;
 
 use eval::{Lisp, FuncError, FuncResult};
 use valtype::Type;
@@ -27,6 +29,17 @@ pub fn func(func: RawFunc, args: Args) -> Func {
     }
 }
 
+pub trait ForeignType: Any + Debug { }
+
+#[derive(Clone, Debug)]
+pub struct Foreign(Rc<ForeignType>);
+
+impl PartialEq for Foreign {
+    fn eq(&self, _: &Self) -> bool {
+        false
+    }
+}
+
 #[derive(Clone, PartialEq)]
 pub enum Value {
     Number(f32),
@@ -46,8 +59,10 @@ pub enum Value {
     List(Vec<Value>),
     Nil,
 
-  Quote(Box<Value>),
+    Quote(Box<Value>),
     Type(Type),
+
+    Foreign(Foreign),
 }
 
 impl Value {
@@ -83,6 +98,7 @@ impl Value {
             &Value::Nil => Type::Nil,
             &Value::Quote(ref val) => Type::Quote(box val.typ()),
             &Value::Type(_) => Type::Type,
+            &Value::Foreign(ref value) => Type::Foreign(value.get_type_id()),
         }
     }
 }
@@ -157,4 +173,10 @@ impl FromLisp for () {
 
 impl ToLisp for Value {
     fn to_lisp(self) -> Value { self }
+}
+
+impl<T: ForeignType> ToLisp for Rc<T> {
+    fn to_lisp(self) -> Value {
+        Value::Foreign(Foreign(self))
+    }
 }

@@ -9,3 +9,6 @@
 
 ; well?
 (is-the-answer? 42)
+
+; example of accessing a Rust value
+(print "A rusty value: " my-rust-value)

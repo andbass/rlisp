@@ -200,6 +200,7 @@ impl fmt::Debug for Value {
             &Value::Bool(val) => write!(fmt, "{}", val),
             &Value::Quote(ref tok) => write!(fmt, "'{:?}", tok),
             &Value::Type(ref typ) => write!(fmt, "{:?}", typ),
+            &Value::Foreign(ref val) => write!(fmt, "{:?}", val),
         }
     }
 }

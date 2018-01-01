@@ -1,4 +1,6 @@
 
+use std::any::TypeId;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Type {
     Number,
@@ -16,4 +18,6 @@ pub enum Type {
 
     Type,
     Quote(Box<Type>),
+
+    Foreign(TypeId),
 }

@@ -1,5 +1,5 @@
 
-#![feature(box_syntax, iterator_step_by)]
+#![feature(box_syntax, iterator_step_by, get_type_id)]
 
 extern crate regex;
 
@@ -24,5 +24,5 @@ mod default_env;
 
 pub use eval::{Lisp, FuncResult, FuncError};
 pub use env::Env;
-pub use value::{Value, ToLisp, FromLisp};
+pub use value::{Value, ToLisp, FromLisp, ForeignType};
 pub use parse::{ParseResult, ParseError};
