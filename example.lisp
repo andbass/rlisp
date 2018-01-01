@@ -1,4 +1,4 @@
-(def {is-the-answer? ans}
+(def {is-the-answer? ans} ; comments work!
   {if (= ans 42)
     {seq
       {print "HOORAY!"}
@@ -7,4 +7,5 @@
     {print "NO"}
   })
 
+; well?
 (is-the-answer? 42)

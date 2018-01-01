@@ -63,6 +63,11 @@ pub fn write_list<T>(fmt: &mut fmt::Formatter, list: &Vec<T>, start: &str, sep: 
     write!(fmt, "{}", end)
 }
 
+fn remove_comments(code: &str) -> String {
+    let re = Regex::new(r#";.*\n"#).unwrap();
+    re.replace_all(code, "").to_string()
+}
+
 fn tokenize(code: &str) -> VecDeque<String> {
     let string_re = r#""[^"]*""#;
     let sym_re = r"[-!?#\w\.]+";
@@ -78,7 +83,7 @@ fn tokenize(code: &str) -> VecDeque<String> {
         Err(_) => return VecDeque::new(),
     };
 
-    let spaced_code = code.to_string()
+    let spaced_code = remove_comments(code)
         .replace("(", " ( ")
         .replace(")", " ) ");
 

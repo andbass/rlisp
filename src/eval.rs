@@ -21,7 +21,7 @@ pub enum FuncError {
     UndeclaredSymbol(String),
 
     AttemptToCallNonFunction(Value),
-  AttemptToEvalEmptyList,
+    AttemptToEvalEmptyList,
 
     GivenEmptyList,
 
