@@ -41,6 +41,12 @@ impl Lisp {
         }
     }
 
+    pub fn new_no_stdlib() -> Lisp {
+        Lisp {
+            scopes: Vec::new(),
+        }
+    }
+
     pub fn eval<T: FromLisp>(&mut self, code: &str) -> Result<T, FuncError> {
         let result = try!(self.eval_raw(code));
 
