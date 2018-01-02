@@ -1,4 +1,5 @@
 
+
 extern crate rlisp;
 
 use std::fs::File;
@@ -19,5 +20,8 @@ fn main() {
 
     lisp.set_global("my-rust-value", Rc::new(Test { x: 42 }));
 
-    println!("{:?}", lisp.eval_reader(file));
+    let result = lisp.eval_reader(file).unwrap();
+    let result_casted: &Test = result.as_foreign().unwrap();
+
+    println!("{:?}", result_casted);
 }

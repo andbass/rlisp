@@ -1,7 +1,10 @@
 
-#![feature(box_syntax, iterator_step_by, get_type_id)]
+#![feature(box_syntax, iterator_step_by, get_type_id, rc_downcast)]
 
 extern crate regex;
+
+#[macro_use]
+extern crate mopa;
 
 macro_rules! invalid_args {
     ($lisp:expr, $expected:expr, $args:expr) => {

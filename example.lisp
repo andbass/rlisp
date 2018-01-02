@@ -12,3 +12,5 @@
 
 ; example of accessing a Rust value
 (print "A rusty value: " my-rust-value)
+
+my-rust-value ; the last expression evaluated is returned from a script to Rust

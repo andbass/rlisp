@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use std::marker::Sized;
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::fmt::Debug;
 
 use eval::{Lisp, FuncError, FuncResult};
@@ -30,6 +30,17 @@ pub fn func(func: RawFunc, args: Args) -> Func {
 }
 
 pub trait ForeignType: Any + Debug { }
+
+fn cast<'a, T: Any>(from: Rc<ForeignType>) -> Option<&'a T> {
+    if (*from).get_type_id() == TypeId::of::<T>() {
+        unsafe {
+            let ptr = &*from;
+            Some(&*(ptr as *const ForeignType as *const T))
+        }
+    } else {
+        None
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Foreign(Rc<ForeignType>);
@@ -65,7 +76,7 @@ pub enum Value {
     Foreign(Foreign),
 }
 
-impl Value {
+impl<'a> Value {
     pub fn as_sym(self) -> Result<String, FuncError> {
         match self {
             Value::Symbol(sym) => Ok(sym),
@@ -82,6 +93,23 @@ impl Value {
             _ => Err(FuncError::InvalidType {
                 expected: vec![Type::List],
                 got: self,
+            }),
+        }
+    }
+
+    pub fn as_foreign<T: ForeignType>(&self) -> Result<&T, FuncError> {
+        match self {
+            &Value::Foreign(Foreign(ref rc)) => {
+                cast(rc.clone()).map(Ok).unwrap_or_else(move || {
+                    Err(FuncError::InvalidType {
+                        expected: vec![Type::Foreign(TypeId::of::<T>())],
+                        got: self.clone()
+                    })
+                })
+            },
+            _ => Err(FuncError::InvalidType {
+                expected: vec![Type::Foreign(TypeId::of::<T>())],
+                got: self.clone(),
             }),
         }
     }
