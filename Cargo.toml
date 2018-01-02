@@ -5,7 +5,6 @@ authors = ["Andrew Bass <andybass009@gmail.com>"]
 
 [dependencies]
 regex = "*"
-mopa = "*"
 
 [dev_dependencies]
 readline = "*"

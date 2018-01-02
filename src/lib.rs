@@ -3,9 +3,6 @@
 
 extern crate regex;
 
-#[macro_use]
-extern crate mopa;
-
 macro_rules! invalid_args {
     ($lisp:expr, $expected:expr, $args:expr) => {
         $lisp.exit_scope();
