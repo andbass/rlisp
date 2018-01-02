@@ -28,6 +28,8 @@ pub enum FuncError {
     IoError(io::Error),
 
     ParsingErr(ParseError),
+
+    UserError(String),
 }
 
 pub struct Lisp {

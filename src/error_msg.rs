@@ -33,6 +33,9 @@ impl fmt::Debug for FuncError {
             &FuncError::ParsingErr(ref err) => {
                 write!(fmt, "Error while parsing source code: {:?}", err)
             },
+            &FuncError::UserError(ref err) => {
+                write!(fmt, "Error from Rust: {}", err)
+            }
         }
     }
 }
